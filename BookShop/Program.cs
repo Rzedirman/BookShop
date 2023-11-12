@@ -1,7 +1,13 @@
 using BookShop.Data;
 using BookShop.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using BookShop.Interfaces;
+using BookShop.Classes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +26,18 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<myShopContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Login";
+        options.AccessDeniedPath = "/Home/AccessDenied";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddTransient<IUserInitializeService, AdminInitializeService>();
+//builder.Services.AddScoped<IUserInitializeService, AdminInitializeService>();
+//builder.Services.AddScoped<myShopContext>();
+//builder.WebHost.UseDefaultServiceProvider(options => options.ValidateScopes = false);//My try to solve the error
 
 var app = builder.Build();
 
@@ -45,7 +63,15 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Login}");
 app.MapRazorPages();
+
+using (var serviceScope = app.Services.CreateScope())
+{
+    var services = serviceScope.ServiceProvider;
+
+    var userInitializer = services.GetRequiredService<IUserInitializeService>();
+    userInitializer.Initialize();
+}
 
 app.Run();

@@ -19,6 +19,7 @@ namespace BookShop.Models
         public string? Phone { get; set; }
         public DateTime BirthDate { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string Password { get; set; } = null!;
 
         public virtual Role Role { get; set; } = null!;
         public virtual ICollection<Cart> Carts { get; set; }

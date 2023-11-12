@@ -189,6 +189,8 @@ namespace BookShop.Models
 
                 entity.Property(e => e.Email).HasMaxLength(150);
 
+                entity.Property(e => e.Password).HasMaxLength(100);
+
                 entity.Property(e => e.LastName).HasMaxLength(100);
 
                 entity.Property(e => e.Name).HasMaxLength(100);
