@@ -2,7 +2,7 @@
     ViewData["Title"] = "Login Page";
 }
 
-<div class="text-center">
+@*<div class="text-center">
     <h2>Login Form</h2>
         <form method='post'>
             <p>
@@ -15,25 +15,27 @@
             </p>
             <input type='submit' value='Login' />
         </form>
+</div>*@
+
+
+<div class="row">
+    <div class="col-md-4">
+        @if(@ViewBag.Message!="")
+        {
+            <p style="color:red;">@ViewBag.Message</p>
+        }
+        <form method='post'>
+            <div class="form-group">
+                <label class="control-label">Email</label>
+                <input name='email' class="form-control" />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Password</label>
+                <input type='password' name='password' class="form-control" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Log In" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

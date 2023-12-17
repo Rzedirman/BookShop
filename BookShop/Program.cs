@@ -39,6 +39,19 @@ builder.Services.AddTransient<IUserInitializeService, AdminInitializeService>();
 //builder.Services.AddScoped<myShopContext>();
 //builder.WebHost.UseDefaultServiceProvider(options => options.ValidateScopes = false);//My try to solve the error
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddRazorPages();
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//        {
+//            policy.WithOrigins("*")
+//                   .AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowedToAllowWildcardSubdomains();
+            
+//        });
+//});
+builder.Services.AddSession();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,11 +65,13 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+//app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -65,6 +80,12 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Login}");
 app.MapRazorPages();
+
+//var cookiePolicyOptions = new CookiePolicyOptions
+//{
+//    MinimumSameSitePolicy = SameSiteMode.Strict
+//};
+//app.UseCookiePolicy(cookiePolicyOptions);
 
 using (var serviceScope = app.Services.CreateScope())
 {
