@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BookShop.Controllers
 {
@@ -77,6 +78,58 @@ namespace BookShop.Controllers
             ViewBag.Message = "Email or Password are incorrect";
             return View();
         }
+
+
+
+        public IActionResult Signup()
+        {
+            //ViewData["RoleId"] = new SelectList(_context.Roles, "RoleId", "RoleId");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Signup([Bind("Email,Password,LastName,Name,Phone,BirthDate")] BookShop.ViewModels.CreateUserViewModel usr)
+        {
+            if (ModelState.IsValid)
+            {
+
+                var userFromDB = await _context.Users.FirstOrDefaultAsync(u => u.Email == usr.Email);
+                var roleForNewUser = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "user");
+                if (userFromDB == null)
+                {
+                    string hashedPassword = String.Empty;
+                    using (var myHash = SHA256.Create())
+                    {
+                        var byteArrayResultOfRawData = Encoding.UTF8.GetBytes(usr.Password);
+                        var byteArrayResult = myHash.ComputeHash(byteArrayResultOfRawData);
+                        hashedPassword = string.Concat(Array.ConvertAll(byteArrayResult, h => h.ToString("X2")));
+                    }
+
+                    User newUser = new User
+                    {
+                        Name = usr.Name,
+                        LastName = usr.LastName,
+                        Email = usr.Email,
+                        Phone = usr.Phone,
+                        BirthDate = usr.BirthDate,
+                        Password = hashedPassword,
+                        Role = roleForNewUser
+                    };
+                    _context.Users.Add(newUser);
+                    _context.SaveChanges();
+
+                    return RedirectToAction("Index", "Home");
+                    
+                }
+                ViewBag.Message = "This Email already exist";
+
+            }
+            
+            return View(usr);
+        }
+
+
 
 
 

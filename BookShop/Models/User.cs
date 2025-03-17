@@ -24,5 +24,6 @@ namespace BookShop.Models
         public virtual Role Role { get; set; } = null!;
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Favorite> Favorites { get; set; } = new HashSet<Favorite>();
     }
 }

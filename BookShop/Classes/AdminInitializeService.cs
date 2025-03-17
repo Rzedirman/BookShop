@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BookShop.Classes
 {
-    public class AdminInitializeService : IUserInitializeService
+    public class AdminInitializeService : IUserInitializeService//Creating an Admin user
     {
         //private readonly myShopContext _context = new myShopContext();
         private readonly myShopContext _context;

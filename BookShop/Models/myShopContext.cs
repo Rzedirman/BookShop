@@ -24,6 +24,7 @@ namespace BookShop.Models
         public virtual DbSet<Product> Products { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<Favorite> Favorites { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -206,6 +207,31 @@ namespace BookShop.Models
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Users_Roles");
+            });
+
+            modelBuilder.Entity<Favorite>(entity =>
+            {
+                entity.ToTable("Favorites", "Favorites");
+
+                // Set composite primary key
+                entity.HasKey(e => new { e.UserId, e.ProductId });
+
+                entity.Property(e => e.UserId).HasColumnName("UserID");
+                entity.Property(e => e.ProductId).HasColumnName("ProductID");
+                entity.Property(e => e.AddedDate).HasDefaultValueSql("(getdate())");
+
+                // Configure relationships
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Favorites) 
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Favorites_Users");
+
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.Favorites) 
+                    .HasForeignKey(d => d.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Favorites_Products");
             });
 
             OnModelCreatingPartial(modelBuilder);

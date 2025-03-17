@@ -1,0 +1,261 @@
+@model BookShop.ViewModels.BookViewModel
+@{
+    ViewData["Title"] = "Reader - " + Model.Title;
+    Layout = "_ReaderLayout"; // Consider creating a special layout for the reader with minimal UI
+}
+
+<div class="reader-container">
+    <div class="reader-header">
+        <div class="book-title">@Model.Title</div>
+        <div class="reader-controls">
+            <button id="previous-page" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Previous
+            </button>
+            <span id="page-info">Page <span id="current-page">1</span> of <span id="page-count">...</span></span>
+            <button id="next-page" class="btn btn-sm btn-outline-secondary">
+                Next <i class="bi bi-arrow-right"></i>
+            </button>
+            <button id="bookmark-btn" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-bookmark"></i> Bookmark
+            </button>
+            <div class="zoom-controls">
+                <button id="zoom-out" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-zoom-out"></i>
+                </button>
+                <span id="zoom-level">100%</span>
+                <button id="zoom-in" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-zoom-in"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bookmark-form" style="display: none;">
+        <form id="add-bookmark-form">
+            <div class="input-group mb-3">
+                <input type="text" id="bookmark-name" class="form-control" placeholder="Bookmark name" required>
+                <input type="hidden" id="bookmark-page" value="1">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <button class="btn btn-outline-secondary bookmark-cancel" type="button">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bookmarks-panel">
+        <div class="bookmarks-toggle">
+            <button id="show-bookmarks" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-bookmarks"></i> Show Bookmarks
+            </button>
+        </div>
+        <div class="bookmarks-list" style="display: none;">
+            <h5>Bookmarks</h5>
+            <div id="bookmarks-container">
+                <!-- Bookmarks will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-viewer">
+        <div id="pdf-container"></div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Reader-specific styles */
+        .reader-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+        
+        .reader-header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .book-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .reader-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #pdf-viewer {
+            flex-grow: 1;
+            overflow: auto;
+            background-color: #e9ecef;
+        }
+        
+        #pdf-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .bookmarks-panel {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .bookmarks-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .bookmark-item {
+            padding: 5px 10px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bookmark-item:hover {
+            background-color: #f1f3f5;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/lib/pdf-js/build/pdf.min.js"></script>
+    <script>
+        // Book data
+        const bookId = @Model.Id;
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let scale = 1.0;
+        
+        // Initialize PDF.js
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/lib/pdf-js/build/pdf.worker.min.js';
+        
+        // TODO: Load the PDF document
+        function loadPdf() {
+            const loadingTask = pdfjsLib.getDocument('/Reader/GetBookContent/' + bookId);
+            loadingTask.promise.then(function(pdf) {
+                pdfDoc = pdf;
+                document.getElementById('page-count').textContent = pdf.numPages;
+                // Render the first page
+                renderPage(pageNum);
+                
+                // Load bookmarks
+                loadBookmarks();
+            });
+        }
+        
+        // TODO: Render a specific page
+        function renderPage(num) {
+            // Implementation will go here
+        }
+        
+        // TODO: Go to previous page
+        function prevPage() {
+            // Implementation will go here
+        }
+        
+        // TODO: Go to next page
+        function nextPage() {
+            // Implementation will go here
+        }
+        
+        // TODO: Handle zoom
+        function zoomIn() {
+            // Implementation will go here
+        }
+        
+        function zoomOut() {
+            // Implementation will go here
+        }
+        
+        // TODO: Load bookmarks
+        function loadBookmarks() {
+            // Implementation will go here
+        }
+        
+        // TODO: Add bookmark
+        function addBookmark(name, pageNumber) {
+            // Implementation will go here
+        }
+        
+        // TODO: Delete bookmark
+        function deleteBookmark(id) {
+            // Implementation will go here
+        }
+        
+        // TODO: Go to bookmarked page
+        function goToBookmark(pageNumber) {
+            // Implementation will go here
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load the PDF
+            loadPdf();
+            
+            // Set up event listeners for page navigation
+            document.getElementById('previous-page').addEventListener('click', prevPage);
+            document.getElementById('next-page').addEventListener('click', nextPage);
+            
+            // Set up event listeners for zoom
+            document.getElementById('zoom-in').addEventListener('click', zoomIn);
+            document.getElementById('zoom-out').addEventListener('click', zoomOut);
+            
+            // Bookmark panel toggle
+            document.getElementById('show-bookmarks').addEventListener('click', function() {
+                const bookmarksList = document.querySelector('.bookmarks-list');
+                if (bookmarksList.style.display === 'none') {
+                    bookmarksList.style.display = 'block';
+                    this.innerHTML = '<i class="bi bi-bookmarks"></i> Hide Bookmarks';
+                } else {
+                    bookmarksList.style.display = 'none';
+                    this.innerHTML = '<i class="bi bi-bookmarks"></i> Show Bookmarks';
+                }
+            });
+            
+            // Bookmark button
+            document.getElementById('bookmark-btn').addEventListener('click', function() {
+                document.querySelector('.bookmark-form').style.display = 'block';
+                document.getElementById('bookmark-page').value = pageNum;
+            });
+            
+            // Cancel bookmark
+            document.querySelector('.bookmark-cancel').addEventListener('click', function() {
+                document.querySelector('.bookmark-form').style.display = 'none';
+            });
+            
+            // Add bookmark form submission
+            document.getElementById('add-bookmark-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('bookmark-name').value;
+                const page = document.getElementById('bookmark-page').value;
+                addBookmark(name, page);
+                document.querySelector('.bookmark-form').style.display = 'none';
+                document.getElementById('bookmark-name').value = '';
+            });
+        });
+    </script>
+}
