@@ -43,9 +43,9 @@ namespace BookShop.Controllers
         {
             //HttpContext? context = _httpContextAccessor.HttpContext;
             var userFromDB = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            var userRoleFromDB = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId== userFromDB.RoleId);
             if (userFromDB != null)
             {
+                var userRoleFromDB = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == userFromDB.RoleId);
                 string hashedPassword = String.Empty;
                 string hashedPasswordFromDB = userFromDB.Password;
                 using (var myHash = SHA256.Create())
@@ -72,8 +72,6 @@ namespace BookShop.Controllers
 
                 
             }
-
-
 
             ViewBag.Message = "Email or Password are incorrect";
             return View();
