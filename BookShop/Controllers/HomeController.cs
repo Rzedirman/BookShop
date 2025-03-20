@@ -87,13 +87,14 @@ namespace BookShop.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Signup([Bind("Email,Password,LastName,Name,Phone,BirthDate")] BookShop.ViewModels.CreateUserViewModel usr)
+        public async Task<IActionResult> Signup([Bind("Email,Password,LastName,Name,Phone,BirthDate, IsSeller")] BookShop.ViewModels.CreateUserViewModel usr)
         {
             if (ModelState.IsValid)
             {
 
                 var userFromDB = await _context.Users.FirstOrDefaultAsync(u => u.Email == usr.Email);
-                var roleForNewUser = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "user");
+                string roleName = usr.IsSeller ? "seller" : "user";
+                var roleForNewUser = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
                 if (userFromDB == null)
                 {
                     string hashedPassword = String.Empty;
@@ -116,6 +117,17 @@ namespace BookShop.Controllers
                     };
                     _context.Users.Add(newUser);
                     _context.SaveChanges();
+
+                    // Automatically log in the new user
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, usr.Email),
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, roleForNewUser.RoleName)
+                    };
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
                     return RedirectToAction("Index", "Home");
                     

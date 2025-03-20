@@ -47,6 +47,20 @@ namespace BookShop.Classes
                 _context.Users.Add(adminUser);
                 _context.SaveChanges();
             }
+
+            //Creating "user" and "seller" roles
+            if (_context.Roles.FirstOrDefault(r => r.RoleName == "user") == null)
+            {
+                Role userRole = new Role { RoleName = "user" };
+                _context.Roles.Add(userRole);
+                _context.SaveChanges();
+            }
+            if (_context.Roles.FirstOrDefault(r => r.RoleName == "seller") == null)
+            {
+                Role sellerRole = new Role { RoleName = "seller" };
+                _context.Roles.Add(sellerRole);
+                _context.SaveChanges();
+            }
         }
     }   
 }

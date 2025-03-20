@@ -1,4 +1,4 @@
-﻿
+﻿@* \Views\Shared\_Layout.cshtml *@
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +9,29 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookShop.styles.css" asp-append-version="true" />
+    <style>
+        /* Custom styles for sticky footer */
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .footer {
+            margin-top: auto;
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -33,7 +56,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container content-wrapper">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -41,7 +64,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - BookShop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - BookShop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

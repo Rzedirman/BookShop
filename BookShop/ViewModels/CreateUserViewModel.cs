@@ -28,5 +28,8 @@ namespace BookShop.ViewModels
         [DataType(DataType.Date)]
         [Display(Name = "BirthDate")]
         public DateTime BirthDate { get; set; }
+
+        [Display(Name = "I want to sell books on this platform")]
+        public bool IsSeller { get; set; } = false;
     }
 }
