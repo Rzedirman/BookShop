@@ -1,0 +1,130 @@
+﻿@* \Areas\Admin\Views\Dashboard\EditUser.cshtml *@
+
+@model BookShop.Models.User
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container">
+    <h1 class="mb-4">Edit User</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="UpdateUser">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="LastName" class="control-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="control-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Phone" class="control-label"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="BirthDate" class="control-label"></label>
+                            <input asp-for="BirthDate" class="form-control" type="date" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="RoleId" class="control-label">Role</label>
+                            <select asp-for="RoleId" class="form-control">
+                                @foreach (var role in ViewBag.Roles)
+                                {
+                                    <option value="@role.RoleId">@role.RoleName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="RoleId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a asp-action="Users" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+
+
+                    @if (TempData["PasswordMessage"] != null)
+                    {
+                        var isSuccess = !TempData["PasswordMessage"].ToString().Contains("Failed");
+                        var alertClass = isSuccess ? "alert-success" : "alert-danger";
+
+                        <div class="alert @alertClass alert-dismissible fade show" role="alert">
+                            @TempData["PasswordMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Change Password</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <form asp-action="ChangePassword" method="post">
+                                <input type="hidden" name="UserId" value="@Model.UserId" />
+
+                                <div class="form-group mb-3">
+                                    <label for="NewPassword" class="control-label">New Password</label>
+                                    <input type="password" id="NewPassword" name="NewPassword" class="form-control" required />
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="ConfirmPassword" class="control-label">Confirm Password</label>
+                                    <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+                                    <span id="password-error" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-warning">Change Password</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Client-side password confirmation validation
+        document.getElementById('ConfirmPassword').addEventListener('input', function () {
+            var password = document.getElementById('NewPassword').value;
+            var confirmPassword = this.value;
+            var errorElement = document.getElementById('password-error');
+
+            if (password !== confirmPassword) {
+                errorElement.textContent = 'The passwords do not match.';
+            } else {
+                errorElement.textContent = '';
+            }
+        });
+    </script>
+}

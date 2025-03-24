@@ -42,13 +42,14 @@ builder.Services.AddTransient<IUserInitializeService, AdminInitializeService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();
 
+
 //builder.Services.AddCors(options =>
 //{
 //    options.AddDefaultPolicy(policy =>
 //        {
 //            policy.WithOrigins("*")
 //                   .AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowedToAllowWildcardSubdomains();
-            
+
 //        });
 //});
 builder.Services.AddSession();
@@ -77,8 +78,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Login}");
+
 app.MapRazorPages();
 
 //var cookiePolicyOptions = new CookiePolicyOptions

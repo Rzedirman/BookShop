@@ -1,4 +1,6 @@
-﻿@model BookShop.Models.Autor
+﻿@* \Views\Authors\Delete.cshtml *@
+
+@model BookShop.Models.Author
 
 @{
     ViewData["Title"] = "Delete";
@@ -8,7 +10,7 @@
 
 <h3>Are you sure you want to delete this?</h3>
 <div>
-    <h4>Autor</h4>
+    <h4>Author</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -44,7 +46,7 @@
     </dl>
     
     <form asp-action="Delete">
-        <input type="hidden" asp-for="AutorId" />
+        <input type="hidden" asp-for="AuthorId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
     </form>

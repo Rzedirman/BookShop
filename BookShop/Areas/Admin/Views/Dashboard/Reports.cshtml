@@ -1,0 +1,102 @@
+﻿@* \Areas\Admin\Views\Dashboard\Reports.cshtml *@
+
+@model BookShop.ViewModels.ReportsViewModel
+@{
+    ViewData["Title"] = "Sales Reports";
+}
+
+<div class="container">
+    <h1 class="mb-4">Sales Reports</h1>
+
+    <div class="row">
+        <!-- Monthly Sales -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Monthly Sales</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Orders</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var month in Model.MonthlySales)
+                                {
+                                    <tr>
+                                        <td>@month.MonthName @month.Year</td>
+                                        <td>@month.OrderCount</td>
+                                        <td>$@month.TotalAmount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales by Genre -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Sales by Genre</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Genre</th>
+                                    <th>Orders</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var genre in Model.SalesByGenre)
+                                {
+                                    <tr>
+                                        <td>@genre.GenreName</td>
+                                        <td>@genre.OrderCount</td>
+                                        <td>$@genre.TotalAmount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Export Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-3">
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="bi bi-file-excel"></i> Export to Excel
+                        </a>
+                        <a href="#" class="btn btn-outline-danger">
+                            <i class="bi bi-file-pdf"></i> Export to PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+}

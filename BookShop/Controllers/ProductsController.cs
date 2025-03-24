@@ -21,7 +21,7 @@ namespace BookShop.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var myShopContext = _context.Products.Include(p => p.Autor).Include(p => p.Genre).Include(p => p.Language);
+            var myShopContext = _context.Products.Include(p => p.Author).Include(p => p.Genre).Include(p => p.Language);
             return View(await myShopContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace BookShop.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.Autor)
+                .Include(p => p.Author)
                 .Include(p => p.Genre)
                 .Include(p => p.Language)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
@@ -49,7 +49,7 @@ namespace BookShop.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["AutorId"] = new SelectList(_context.Autors, "AutorId", "AutorId");
+            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "AuthorId");
             ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "GenreId");
             ViewData["LanguageId"] = new SelectList(_context.Languages, "LanguageId", "LanguageId");
             return View();
@@ -60,7 +60,7 @@ namespace BookShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,AutorId,GenreId,LanguageId,Title,Description,Price,InStock,PublicationDate,ImageName,FileName")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductId,AuthorId,GenreId,LanguageId,Title,Description,Price,InStock,PublicationDate,ImageName,FileName")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -68,7 +68,7 @@ namespace BookShop.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorId"] = new SelectList(_context.Autors, "AutorId", "AutorId", product.AutorId);
+            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "AuthorId", product.AuthorId);
             ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "GenreId", product.GenreId);
             ViewData["LanguageId"] = new SelectList(_context.Languages, "LanguageId", "LanguageId", product.LanguageId);
             return View(product);
@@ -87,7 +87,7 @@ namespace BookShop.Controllers
             {
                 return NotFound();
             }
-            ViewData["AutorId"] = new SelectList(_context.Autors, "AutorId", "AutorId", product.AutorId);
+            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "AuthorId", product.AuthorId);
             ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "GenreId", product.GenreId);
             ViewData["LanguageId"] = new SelectList(_context.Languages, "LanguageId", "LanguageId", product.LanguageId);
             return View(product);
@@ -98,7 +98,7 @@ namespace BookShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,AutorId,GenreId,LanguageId,Title,Description,Price,InStock,PublicationDate,ImageName,FileName")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,AuthorId,GenreId,LanguageId,Title,Description,Price,InStock,PublicationDate,ImageName,FileName")] Product product)
         {
             if (id != product.ProductId)
             {
@@ -125,7 +125,7 @@ namespace BookShop.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorId"] = new SelectList(_context.Autors, "AutorId", "AutorId", product.AutorId);
+            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "AuthorId", product.AuthorId);
             ViewData["GenreId"] = new SelectList(_context.Genres, "GenreId", "GenreId", product.GenreId);
             ViewData["LanguageId"] = new SelectList(_context.Languages, "LanguageId", "LanguageId", product.LanguageId);
             return View(product);
@@ -140,7 +140,7 @@ namespace BookShop.Controllers
             }
 
             var product = await _context.Products
-                .Include(p => p.Autor)
+                .Include(p => p.Author)
                 .Include(p => p.Genre)
                 .Include(p => p.Language)
                 .FirstOrDefaultAsync(m => m.ProductId == id);

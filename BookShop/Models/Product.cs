@@ -12,7 +12,7 @@ namespace BookShop.Models
         }
 
         public int ProductId { get; set; }
-        public int AutorId { get; set; }
+        public int AuthorId { get; set; }
         public int GenreId { get; set; }
         public int LanguageId { get; set; }
         public string Title { get; set; } = null!;
@@ -23,7 +23,7 @@ namespace BookShop.Models
         public string ImageName { get; set; } = null!;
         public string? FileName { get; set; }
 
-        public virtual Autor Autor { get; set; } = null!;
+        public virtual Author Author { get; set; } = null!;
         public virtual Genre Genre { get; set; } = null!;
         public virtual Language Language { get; set; } = null!;
         public virtual ICollection<Cart> Carts { get; set; }

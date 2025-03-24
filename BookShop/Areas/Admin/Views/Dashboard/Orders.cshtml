@@ -1,0 +1,46 @@
+﻿@* \Areas\Admin\Views\Dashboard\Orders.cshtml *@
+
+@model IEnumerable<BookShop.Models.Order>
+@{
+    ViewData["Title"] = "Order Management";
+}
+
+<div class="container">
+    <h1 class="mb-4">Order Management</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Book</th>
+                            <th>Amount</th>
+                            <th>Delivery Address</th>
+                            <th>Order Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>@order.OrderId</td>
+                                <td>@order.User.Email</td>
+                                <td>@order.Product.Title</td>
+                                <td>$@order.Amount</td>
+                                <td>@order.DeliveryAddress</td>
+                                <td>@order.OrderDate.ToString("g")</td>
+                                <td>
+                                    <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-info">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

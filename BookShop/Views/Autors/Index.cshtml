@@ -1,4 +1,6 @@
-﻿@model IEnumerable<BookShop.Models.Autor>
+﻿@* \Views\Authors\Index.cshtml *@
+
+@model IEnumerable<BookShop.Models.Author>
 
 @{
     ViewData["Title"] = "Index";
@@ -49,9 +51,9 @@
                 @Html.DisplayFor(modelItem => item.DeathDate)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.AutorId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AutorId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AutorId">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.AuthorId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.AuthorId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.AuthorId">Delete</a>
             </td>
         </tr>
 }

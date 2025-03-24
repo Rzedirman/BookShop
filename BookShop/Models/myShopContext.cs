@@ -16,7 +16,7 @@ namespace BookShop.Models
         {
         }
 
-        public virtual DbSet<Autor> Autors { get; set; } = null!;
+        public virtual DbSet<Author> Authors { get; set; } = null!;
         public virtual DbSet<Cart> Carts { get; set; } = null!;
         public virtual DbSet<Genre> Genres { get; set; } = null!;
         public virtual DbSet<Language> Languages { get; set; } = null!;
@@ -37,11 +37,11 @@ namespace BookShop.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Autor>(entity =>
+            modelBuilder.Entity<Author>(entity =>
             {
-                entity.ToTable("Autors", "Autors");
+                entity.ToTable("Authors", "Authors");
 
-                entity.Property(e => e.AutorId).HasColumnName("AutorID");
+                entity.Property(e => e.AuthorId).HasColumnName("AuthorID");
 
                 entity.Property(e => e.BirthDate).HasColumnType("date");
 
@@ -128,7 +128,7 @@ namespace BookShop.Models
 
                 entity.Property(e => e.ProductId).HasColumnName("ProductID");
 
-                entity.Property(e => e.AutorId).HasColumnName("AutorID");
+                entity.Property(e => e.AuthorId).HasColumnName("AuthorID");
 
                 entity.Property(e => e.Description).HasMaxLength(2000);
 
@@ -150,11 +150,11 @@ namespace BookShop.Models
 
                 entity.Property(e => e.Title).HasMaxLength(100);
 
-                entity.HasOne(d => d.Autor)
+                entity.HasOne(d => d.Author)
                     .WithMany(p => p.Products)
-                    .HasForeignKey(d => d.AutorId)
+                    .HasForeignKey(d => d.AuthorId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Products_Autors");
+                    .HasConstraintName("FK_Products_Authors");
 
                 entity.HasOne(d => d.Genre)
                     .WithMany(p => p.Products)

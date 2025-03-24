@@ -1,0 +1,54 @@
+﻿@* \Areas\Admin\Views\Dashboard\Books.cshtml *@
+
+@model IEnumerable<BookShop.Models.Product>
+@{
+    ViewData["Title"] = "Book Management";
+}
+
+<div class="container">
+    <h1 class="mb-4">Book Management</h1>
+
+    <p>
+        <a asp-controller="Products" asp-action="Create" class="btn btn-primary">Add New Book</a>
+    </p>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Genre</th>
+                            <th>Language</th>
+                            <th>Price</th>
+                            <th>In Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model)
+                        {
+                            <tr>
+                                <td>@book.ProductId</td>
+                                <td>@book.Title</td>
+                                <td>@book.Author.Name @book.Author.LastName</td>
+                                <td>@book.Genre.GenreName</td>
+                                <td>@book.Language.LanguageName</td>
+                                <td>$@book.Price</td>
+                                <td>@book.InStock</td>
+                                <td>
+                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@book.ProductId" class="btn btn-sm btn-primary">Edit</a>
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">Details</a>
+                                    <a asp-controller="Products" asp-action="Delete" asp-route-id="@book.ProductId" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,11 +9,11 @@ using BookShop.Models;
 
 namespace BookShop.Controllers
 {
-    public class AutorsController : Controller
+    public class AuthorsController : Controller
     {
         private readonly myShopContext _context;
 
-        public AutorsController(myShopContext context)
+        public AuthorsController(myShopContext context)
         {
             _context = context;
         }
@@ -21,27 +21,27 @@ namespace BookShop.Controllers
         // GET: Autors
         public async Task<IActionResult> Index()
         {
-              return _context.Autors != null ? 
-                          View(await _context.Autors.ToListAsync()) :
-                          Problem("Entity set 'myShopContext.Autors'  is null.");
+              return _context.Authors != null ? 
+                          View(await _context.Authors.ToListAsync()) :
+                          Problem("Entity set 'myShopContext.Authors'  is null.");
         }
 
         // GET: Autors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Autors == null)
+            if (id == null || _context.Authors == null)
             {
                 return NotFound();
             }
 
-            var autor = await _context.Autors
-                .FirstOrDefaultAsync(m => m.AutorId == id);
-            if (autor == null)
+            var author = await _context.Authors
+                .FirstOrDefaultAsync(m => m.AuthorId == id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return View(autor);
+            return View(author);
         }
 
         // GET: Autors/Create
@@ -55,31 +55,31 @@ namespace BookShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AutorId,Name,LastName,Country,BirthDate,DeathDate")] Autor autor)
+        public async Task<IActionResult> Create([Bind("AuthorId,Name,LastName,Country,BirthDate,DeathDate")] Author author)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(autor);
+                _context.Add(author);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(autor);
+            return View(author);
         }
 
         // GET: Autors/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Autors == null)
+            if (id == null || _context.Authors == null)
             {
                 return NotFound();
             }
 
-            var autor = await _context.Autors.FindAsync(id);
-            if (autor == null)
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
             {
                 return NotFound();
             }
-            return View(autor);
+            return View(author);
         }
 
         // POST: Autors/Edit/5
@@ -87,9 +87,9 @@ namespace BookShop.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AutorId,Name,LastName,Country,BirthDate,DeathDate")] Autor autor)
+        public async Task<IActionResult> Edit(int id, [Bind("AuthorId,Name,LastName,Country,BirthDate,DeathDate")] Author author)
         {
-            if (id != autor.AutorId)
+            if (id != author.AuthorId)
             {
                 return NotFound();
             }
@@ -98,12 +98,12 @@ namespace BookShop.Controllers
             {
                 try
                 {
-                    _context.Update(autor);
+                    _context.Update(author);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AutorExists(autor.AutorId))
+                    if (!AuthorExists(author.AuthorId))
                     {
                         return NotFound();
                     }
@@ -114,25 +114,25 @@ namespace BookShop.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(autor);
+            return View(author);
         }
 
         // GET: Autors/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Autors == null)
+            if (id == null || _context.Authors == null)
             {
                 return NotFound();
             }
 
-            var autor = await _context.Autors
-                .FirstOrDefaultAsync(m => m.AutorId == id);
-            if (autor == null)
+            var author = await _context.Authors
+                .FirstOrDefaultAsync(m => m.AuthorId == id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return View(autor);
+            return View(author);
         }
 
         // POST: Autors/Delete/5
@@ -140,23 +140,23 @@ namespace BookShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Autors == null)
+            if (_context.Authors == null)
             {
-                return Problem("Entity set 'myShopContext.Autors'  is null.");
+                return Problem("Entity set 'myShopContext.Authors'  is null.");
             }
-            var autor = await _context.Autors.FindAsync(id);
-            if (autor != null)
+            var author = await _context.Authors.FindAsync(id);
+            if (author != null)
             {
-                _context.Autors.Remove(autor);
+                _context.Authors.Remove(author);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AutorExists(int id)
+        private bool AuthorExists(int id)
         {
-          return (_context.Autors?.Any(e => e.AutorId == id)).GetValueOrDefault();
+          return (_context.Authors?.Any(e => e.AuthorId == id)).GetValueOrDefault();
         }
     }
 }
