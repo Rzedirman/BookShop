@@ -79,16 +79,16 @@ namespace BookShop.Areas.Admin.Controllers
             return View(dashboard);
         }
 
-        public async Task<IActionResult> Users()
-        {
-            _logger.LogInformation("Loading user management");
+        //public async Task<IActionResult> Users()
+        //{
+        //    _logger.LogInformation("Loading user management");
 
-            var users = await _context.Users
-                .Include(u => u.Role)
-                .ToListAsync();
+        //    var users = await _context.Users
+        //        .Include(u => u.Role)
+        //        .ToListAsync();
 
-            return View(users);
-        }
+        //    return View(users);
+        //}
 
         public async Task<IActionResult> Books()
         {
@@ -169,105 +169,105 @@ namespace BookShop.Areas.Admin.Controllers
         }
 
         // User management actions
-        [HttpGet]
-        public async Task<IActionResult> EditUser(int id)
-        {
-            // TODO: Get user details for editing
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == id);
+        //[HttpGet]
+        //public async Task<IActionResult> EditUser(int id)
+        //{
+        //    // TODO: Get user details for editing
+        //    var user = await _context.Users
+        //        .Include(u => u.Role)
+        //        .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+        //    if (user == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            ViewBag.Roles = await _context.Roles.ToListAsync();
-            return View(user);
-        }
+        //    ViewBag.Roles = await _context.Roles.ToListAsync();
+        //    return View(user);
+        //}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateUser(User user)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var existingUser = await _context.Users.FindAsync(user.UserId);
-                    if (existingUser == null)
-                    {
-                        return NotFound();
-                    }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> UpdateUser(User user)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            var existingUser = await _context.Users.FindAsync(user.UserId);
+        //            if (existingUser == null)
+        //            {
+        //                return NotFound();
+        //            }
 
-                    // Update user properties
-                    existingUser.Name = user.Name;
-                    existingUser.LastName = user.LastName;
-                    existingUser.Email = user.Email;
-                    existingUser.Phone = user.Phone;
-                    existingUser.BirthDate = user.BirthDate;
-                    existingUser.RoleId = user.RoleId;
+        //            // Update user properties
+        //            existingUser.Name = user.Name;
+        //            existingUser.LastName = user.LastName;
+        //            existingUser.Email = user.Email;
+        //            existingUser.Phone = user.Phone;
+        //            existingUser.BirthDate = user.BirthDate;
+        //            existingUser.RoleId = user.RoleId;
 
-                    _context.Update(existingUser);
-                    await _context.SaveChangesAsync();
+        //            _context.Update(existingUser);
+        //            await _context.SaveChangesAsync();
 
-                    return RedirectToAction(nameof(Users));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating user");
-                    ModelState.AddModelError("", "Unable to save changes. Please try again.");
-                }
-            }
+        //            return RedirectToAction(nameof(Users));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.LogError(ex, "Error updating user");
+        //            ModelState.AddModelError("", "Unable to save changes. Please try again.");
+        //        }
+        //    }
 
-            ViewBag.Roles = await _context.Roles.ToListAsync();
-            return View("EditUser", user);
-        }
+        //    ViewBag.Roles = await _context.Roles.ToListAsync();
+        //    return View("EditUser", user);
+        //}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(UserPasswordViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await _context.Users.FindAsync(model.UserId);
-                if (user == null)
-                {
-                    return NotFound();
-                }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ChangePassword(UserPasswordViewModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var user = await _context.Users.FindAsync(model.UserId);
+        //        if (user == null)
+        //        {
+        //            return NotFound();
+        //        }
 
-                // Hash the new password
-                string hashedPassword = String.Empty;
-                using (var myHash = SHA256.Create())
-                {
-                    var byteArrayResultOfRawData = Encoding.UTF8.GetBytes(model.NewPassword);
-                    var byteArrayResult = myHash.ComputeHash(byteArrayResultOfRawData);
-                    hashedPassword = string.Concat(Array.ConvertAll(byteArrayResult, h => h.ToString("X2")));
-                }
+        //        // Hash the new password
+        //        string hashedPassword = String.Empty;
+        //        using (var myHash = SHA256.Create())
+        //        {
+        //            var byteArrayResultOfRawData = Encoding.UTF8.GetBytes(model.NewPassword);
+        //            var byteArrayResult = myHash.ComputeHash(byteArrayResultOfRawData);
+        //            hashedPassword = string.Concat(Array.ConvertAll(byteArrayResult, h => h.ToString("X2")));
+        //        }
 
-                // Update the user's password
-                user.Password = hashedPassword;
-                _context.Update(user);
-                await _context.SaveChangesAsync();
+        //        // Update the user's password
+        //        user.Password = hashedPassword;
+        //        _context.Update(user);
+        //        await _context.SaveChangesAsync();
 
-                // Add a success message
-                TempData["PasswordMessage"] = "Password has been changed successfully.";
+        //        // Add a success message
+        //        TempData["PasswordMessage"] = "Password has been changed successfully.";
 
-                return RedirectToAction(nameof(EditUser), new { id = model.UserId });
-            }
+        //        return RedirectToAction(nameof(EditUser), new { id = model.UserId });
+        //    }
 
-            // If we got this far, something failed; redisplay form
-            var existingUser = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == model.UserId);
+        //    // If we got this far, something failed; redisplay form
+        //    var existingUser = await _context.Users
+        //        .Include(u => u.Role)
+        //        .FirstOrDefaultAsync(u => u.UserId == model.UserId);
 
-            ViewBag.Roles = await _context.Roles.ToListAsync();
+        //    ViewBag.Roles = await _context.Roles.ToListAsync();
 
-            // Add an error message
-            TempData["PasswordMessage"] = "Failed to change password. Please check your input.";
+        //    // Add an error message
+        //    TempData["PasswordMessage"] = "Failed to change password. Please check your input.";
 
-            return View("EditUser", existingUser);
-        }
+        //    return View("EditUser", existingUser);
+        //}
 
 
 

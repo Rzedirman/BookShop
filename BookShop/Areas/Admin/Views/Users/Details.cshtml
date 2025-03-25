@@ -1,0 +1,52 @@
+﻿@* \Areas\Admin\Views\Users\Details.cshtml *@
+
+@model BookShop.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container">
+    <h1 class="mb-4">User Details</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">User ID</dt>
+                        <dd class="col-sm-9">@Model.UserId</dd>
+
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@Model.Name @Model.LastName</dd>
+
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.Email</dd>
+
+                        <dt class="col-sm-3">Phone</dt>
+                        <dd class="col-sm-9">@(Model.Phone ?? "Not provided")</dd>
+
+                        <dt class="col-sm-3">Birth Date</dt>
+                        <dd class="col-sm-9">@Model.BirthDate.ToShortDateString()</dd>
+
+                        <dt class="col-sm-3">Role</dt>
+                        <dd class="col-sm-9"><span class="badge bg-secondary">@Model.Role.RoleName</span></dd>
+
+                        <dt class="col-sm-3">Created Date</dt>
+                        <dd class="col-sm-9">@Model.CreatedDate.ToString("g")</dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary">Edit</a>
+                        @* <a asp-action="ChangePassword" asp-route-id="@Model.UserId" class="btn btn-warning">Change Password</a> *@
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
