@@ -62,6 +62,12 @@ namespace BookShop.Controllers
         {
             if (ModelState.IsValid)
             {
+                var product = await _context.Products.FindAsync(order.ProductId);
+                if (product != null)
+                {
+                    order.TotalPrice = order.Amount * product.Price;
+                }
+
                 _context.Add(order);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -105,6 +111,12 @@ namespace BookShop.Controllers
             {
                 try
                 {
+                    var product = await _context.Products.FindAsync(order.ProductId);
+                    if (product != null)
+                    {
+                        order.TotalPrice = order.Amount * product.Price;
+                    }
+
                     _context.Update(order);
                     await _context.SaveChangesAsync();
                 }

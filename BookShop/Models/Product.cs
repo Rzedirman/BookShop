@@ -22,10 +22,12 @@ namespace BookShop.Models
         public DateTime PublicationDate { get; set; }
         public string ImageName { get; set; } = null!;
         public string? FileName { get; set; }
+        public int? SellerId { get; set; }
 
         public virtual Author Author { get; set; } = null!;
         public virtual Genre Genre { get; set; } = null!;
         public virtual Language Language { get; set; } = null!;
+        public virtual User? Seller { get; set; }
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; } = new HashSet<Favorite>();

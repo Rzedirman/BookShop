@@ -9,6 +9,7 @@ namespace BookShop.Models
         {
             Carts = new HashSet<Cart>();
             Orders = new HashSet<Order>();
+            ProductsAsSeller = new HashSet<Product>();
         }
 
         public int UserId { get; set; }
@@ -20,10 +21,12 @@ namespace BookShop.Models
         public DateTime BirthDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public string Password { get; set; } = null!;
+        public decimal Balance { get; set; } = 0;
 
         public virtual Role Role { get; set; } = null!;
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; } = new HashSet<Favorite>();
+        public virtual ICollection<Product> ProductsAsSeller { get; set; }
     }
 }

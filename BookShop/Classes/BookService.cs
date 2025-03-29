@@ -1,7 +1,6 @@
 // BookService.cs
 // Implementation of book-related operations
 
-using BookShop.Data;
 using BookShop.Interfaces;
 using BookShop.Models;
 using BookShop.ViewModels;
@@ -17,13 +16,13 @@ namespace BookShop.Classes
 {
     public class BookService : IBookService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly myShopContext _context;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMemoryCache _cache;
         private readonly ILogger<BookService> _logger;
 
         public BookService(
-            ApplicationDbContext context,
+            myShopContext context,
             IFileStorageService fileStorageService,
             IMemoryCache cache,
             ILogger<BookService> logger)

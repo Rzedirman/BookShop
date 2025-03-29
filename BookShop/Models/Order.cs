@@ -11,6 +11,7 @@ namespace BookShop.Models
         public int Amount { get; set; }
         public string DeliveryAddress { get; set; } = null!;
         public DateTime OrderDate { get; set; }
+        public decimal TotalPrice { get; set; }
 
         public virtual Product Product { get; set; } = null!;
         public virtual User User { get; set; } = null!;

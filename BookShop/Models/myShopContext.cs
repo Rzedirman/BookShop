@@ -107,6 +107,8 @@ namespace BookShop.Models
 
                 entity.Property(e => e.ProductId).HasColumnName("ProductID");
 
+                entity.Property(e => e.TotalPrice).HasColumnType("decimal(10, 2)");
+
                 entity.Property(e => e.UserId).HasColumnName("UserID");
 
                 entity.HasOne(d => d.Product)
@@ -148,6 +150,8 @@ namespace BookShop.Models
 
                 entity.Property(e => e.PublicationDate).HasColumnType("date");
 
+                entity.Property(e => e.SellerId).HasColumnName("SellerID");
+
                 entity.Property(e => e.Title).HasMaxLength(100);
 
                 entity.HasOne(d => d.Author)
@@ -167,6 +171,12 @@ namespace BookShop.Models
                     .HasForeignKey(d => d.LanguageId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Products_Languages");
+
+                entity.HasOne(d => d.Seller)
+                    .WithMany(p => p.ProductsAsSeller)
+                    .HasForeignKey(d => d.SellerId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("FK_Products_Users_Seller");
             });
 
             modelBuilder.Entity<Role>(entity =>
@@ -197,6 +207,10 @@ namespace BookShop.Models
                 entity.Property(e => e.Name).HasMaxLength(100);
 
                 entity.Property(e => e.Phone).HasMaxLength(20);
+
+                entity.Property(e => e.Balance)
+                    .HasColumnType("decimal(10, 2)")
+                    .HasDefaultValue(0);
 
                 entity.Property(e => e.RoleId)
                     .HasColumnName("RoleID")

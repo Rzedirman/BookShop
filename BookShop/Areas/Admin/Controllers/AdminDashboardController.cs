@@ -39,15 +39,7 @@ namespace BookShop.Areas.Admin.Controllers
         {
             _logger.LogInformation("Loading admin dashboard");
 
-            var totalSalesAmount = await _context.Orders
-            .Join(_context.Products,
-            order => order.ProductId,
-            product => product.ProductId,
-            (order, product) => new {
-                OrderAmount = order.Amount,
-                ProductPrice = product.Price
-            })
-            .SumAsync(x => x.OrderAmount * x.ProductPrice);
+            var totalSalesAmount = await _context.Orders.SumAsync(o => o.TotalPrice);
 
             // Create a dashboard view model with statistics
             var dashboard = new DashboardViewModel
@@ -69,7 +61,7 @@ namespace BookShop.Areas.Admin.Controllers
                     ProductId = g.Key,
                     Title = g.First().Product.Title,
                     SalesCount = g.Sum(o => o.Amount), // Sum of all books sold, not just order count
-                    TotalAmount = g.Sum(o => o.Amount * o.Product.Price) // Multiply quantity by price
+                    TotalAmount = g.Sum(o => o.TotalPrice) // Multiply quantity by price
                 })
                 .OrderByDescending(b => b.SalesCount)
                 .Take(5)
@@ -122,39 +114,27 @@ namespace BookShop.Areas.Admin.Controllers
 
             // Monthly sales summary
             var monthlySales = await _context.Orders
-            .Join(_context.Products,
-            order => order.ProductId,
-            product => product.ProductId,
-            (order, product) => new {
-                Order = order,
-                Product = product
-            })
-            .GroupBy(x => new { Month = x.Order.OrderDate.Month, Year = x.Order.OrderDate.Year })
+            .GroupBy(x => new { Month = x.OrderDate.Month, Year = x.OrderDate.Year })
             .Select(g => new MonthlySalesViewModel
             {
                 Year = g.Key.Year,
                 Month = g.Key.Month,
                 OrderCount = g.Count(),
-                TotalAmount = g.Sum(x => x.Order.Amount * x.Product.Price)
+                TotalAmount = g.Sum(x => x.TotalPrice)
             })
             .OrderByDescending(s => s.Year)
             .ThenByDescending(s => s.Month)
             .ToListAsync();
 
             var salesByGenre = await _context.Orders
-                .Join(_context.Products,
-                    order => order.ProductId,
-                    product => product.ProductId,
-                    (order, product) => new {
-                        Order = order,
-                        Product = product
-                    })
+                .Include(o => o.Product)
+                .ThenInclude(p => p.Genre)
                 .GroupBy(x => x.Product.Genre.GenreName)
                 .Select(g => new SalesByGenreViewModel
                 {
                     GenreName = g.Key,
-                    OrderCount = g.Sum(x => x.Order.Amount),
-                    TotalAmount = g.Sum(x => x.Order.Amount * x.Product.Price)
+                    OrderCount = g.Sum(x => x.Amount),
+                    TotalAmount = g.Sum(x => x.TotalPrice)
                 })
                 .OrderByDescending(s => s.OrderCount)
                 .ToListAsync();
