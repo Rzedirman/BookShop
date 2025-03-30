@@ -1,0 +1,98 @@
+﻿@* Areas/Admin/Views/Genres/Delete.cshtml *@
+
+@model BookShop.Models.Genre
+
+@{
+    ViewData["Title"] = "Delete Genre";
+    bool genreInUse = (bool)ViewData["GenreInUse"];
+}
+
+<div class="container">
+    <h1 class="mb-4">Delete Genre</h1>
+
+    @if (genreInUse)
+    {
+        <div class="alert alert-danger">
+            <h4>This genre cannot be deleted</h4>
+            <p>This genre is currently being used by one or more books. To delete this genre, first reassign or delete all books that use it.</p>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <h4>Are you sure you want to delete this genre?</h4>
+            <p>This action cannot be undone.</p>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Genre Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID</dt>
+                        <dd class="col-sm-8">@Model.GenreId</dd>
+
+                        <dt class="col-sm-4">Genre Name</dt>
+                        <dd class="col-sm-8">@Model.GenreName</dd>
+
+                        <dt class="col-sm-4">Number of Books</dt>
+                        <dd class="col-sm-8">@Model.Products.Count</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="GenreId" />
+                        <div class="btn-group" role="group">
+                            @if (!genreInUse)
+                            {
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            }
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Products.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Books in this Genre</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>@book.ProductId</td>
+                                            <td>@book.Title</td>
+                                            <td>@($"{book.Author.Name} {book.Author.LastName}")</td>
+                                            <td>$@book.Price</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
