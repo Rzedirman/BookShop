@@ -1,0 +1,43 @@
+﻿@* Areas/Admin/Views/Languages/Create.cshtml *@
+
+@model BookShop.Models.Language
+
+@{
+    ViewData["Title"] = "Create Language";
+}
+
+<div class="container">
+    <h1 class="mb-4">Create New Language</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Language Details</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="LanguageName" class="control-label">Language Name</label>
+                            <input asp-for="LanguageName" class="form-control" />
+                            <span asp-validation-for="LanguageName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

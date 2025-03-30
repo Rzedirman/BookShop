@@ -1,0 +1,81 @@
+﻿@* Areas/Admin/Views/Languages/Details.cshtml *@
+
+@model BookShop.Models.Language
+
+@{
+    ViewData["Title"] = "Language Details";
+}
+
+<div class="container">
+    <h1 class="mb-4">Language Details</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Language Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID</dt>
+                        <dd class="col-sm-8">@Model.LanguageId</dd>
+
+                        <dt class="col-sm-4">Language Name</dt>
+                        <dd class="col-sm-8">@Model.LanguageName</dd>
+
+                        <dt class="col-sm-4">Number of Books</dt>
+                        <dd class="col-sm-8">@Model.Products.Count</dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@Model.LanguageId" class="btn btn-primary">Edit</a>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Products.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Books in this Language</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>@book.ProductId</td>
+                                            <td>@book.Title</td>
+                                            <td>@($"{book.Author.Name} {book.Author.LastName}")</td>
+                                            <td>$@book.Price</td>
+                                            <td>
+                                                <a asp-area="Admin" asp-controller="Books" asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">Details</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
