@@ -35,12 +35,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 builder.Services.AddTransient<IUserInitializeService, AdminInitializeService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>(); // Added FileStorageService registration
 //builder.Services.AddScoped<IUserInitializeService, AdminInitializeService>();
 //builder.Services.AddScoped<myShopContext>();
 //builder.WebHost.UseDefaultServiceProvider(options => options.ValidateScopes = false);//My try to solve the error
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();
+
+// Add memory cache support
+builder.Services.AddMemoryCache();
 
 
 //builder.Services.AddCors(options =>

@@ -1,0 +1,94 @@
+﻿@* Areas/Admin/Views/Authors/Details.cshtml *@
+
+@model BookShop.Models.Author
+
+@{
+    ViewData["Title"] = "Author Details";
+}
+
+<div class="container">
+    <h1 class="mb-4">Author Details</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Author Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID</dt>
+                        <dd class="col-sm-8">@Model.AuthorId</dd>
+
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@Model.Name @Model.LastName</dd>
+
+                        <dt class="col-sm-4">Country</dt>
+                        <dd class="col-sm-8">@Model.Country</dd>
+
+                        <dt class="col-sm-4">Birth Date</dt>
+                        <dd class="col-sm-8">@(Model.BirthDate.HasValue ? Model.BirthDate.Value.ToShortDateString() : "Not specified")</dd>
+
+                        <dt class="col-sm-4">Death Date</dt>
+                        <dd class="col-sm-8">@(Model.DeathDate.HasValue ? Model.DeathDate.Value.ToShortDateString() : "N/A")</dd>
+
+                        <dt class="col-sm-4">Number of Books</dt>
+                        <dd class="col-sm-8">@Model.Products.Count</dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Edit" asp-route-id="@Model.AuthorId" class="btn btn-primary">Edit</a>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Products.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Books by this Author</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Genre</th>
+                                        <th>Language</th>
+                                        <th>Price</th>
+                                        <th>Published</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>@book.ProductId</td>
+                                            <td>@book.Title</td>
+                                            <td>@book.Genre.GenreName</td>
+                                            <td>@book.Language.LanguageName</td>
+                                            <td>$@book.Price</td>
+                                            <td>@book.PublicationDate.ToShortDateString()</td>
+                                            <td>
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">Details</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

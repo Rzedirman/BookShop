@@ -1,0 +1,153 @@
+﻿@* Areas/Admin/Views/Products/Details.cshtml *@
+
+@model BookShop.Models.Product
+
+@{
+    ViewData["Title"] = "Book Details";
+    int totalSales = (int)ViewData["TotalSales"];
+    decimal totalRevenue = (decimal)ViewData["TotalRevenue"];
+}
+
+<div class="container">
+    <h1 class="mb-4">Book Details</h1>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Book Information</h5>
+                    <div>
+                        <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-sm btn-primary">Edit</a>
+                        <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            @if (!string.IsNullOrEmpty(Model.ImageName))
+                            {
+                                <img src="~/images/covers/@Model.ImageName" alt="@Model.Title" class="img-fluid rounded" style="max-height: 200px;">
+                            }
+                            else
+                            {
+                                <img src="~/images/covers/noimage.png" alt="No Image" class="img-fluid rounded" style="max-height: 200px;">
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h4>@Model.Title</h4>
+                            <p class="text-muted">By <a asp-area="Admin" asp-controller="Authors" asp-action="Details" asp-route-id="@Model.AuthorId">@Model.Author.Name @Model.Author.LastName</a></p>
+
+                            <dl class="row">
+                                <dt class="col-sm-4">Genre</dt>
+                                <dd class="col-sm-8"><a asp-area="Admin" asp-controller="Genres" asp-action="Details" asp-route-id="@Model.GenreId">@Model.Genre.GenreName</a></dd>
+
+                                <dt class="col-sm-4">Language</dt>
+                                <dd class="col-sm-8"><a asp-area="Admin" asp-controller="Languages" asp-action="Details" asp-route-id="@Model.LanguageId">@Model.Language.LanguageName</a></dd>
+
+                                <dt class="col-sm-4">Price</dt>
+                                <dd class="col-sm-8">$@Model.Price.ToString("0.00")</dd>
+
+                                <dt class="col-sm-4">Publication Date</dt>
+                                <dd class="col-sm-8">@Model.PublicationDate.ToShortDateString()</dd>
+
+                                <dt class="col-sm-4">In Stock</dt>
+                                <dd class="col-sm-8">@Model.InStock</dd>
+
+                                <dt class="col-sm-4">File Available</dt>
+                                <dd class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.FileName))
+                                    {
+                                        <span class="badge bg-success">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">No</span>
+                                    }
+                                </dd>
+
+                                @if (Model.Seller != null)
+                                {
+                                    <dt class="col-sm-4">Seller</dt>
+                                    <dd class="col-sm-8">
+                                        <a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@Model.SellerId">
+                                            @Model.Seller.Name @Model.Seller.LastName (@Model.Seller.Email)
+                                        </a>
+                                    </dd>
+                                }
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Description</h5>
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Statistics -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Sales Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Total Sales</h6>
+                                    <h3>@totalSales</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Total Revenue</h6>
+                                    <h3>$@totalRevenue.ToString("0.00")</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Orders.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Orders</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>User</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate).Take(5))
+                                    {
+                                        <tr>
+                                            <td>@order.OrderId</td>
+                                            <td>@order.User.Email</td>
+                                            <td>@order.OrderDate.ToShortDateString()</td>
+                                            <td>$@order.TotalPrice.ToString("0.00")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

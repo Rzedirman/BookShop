@@ -19,17 +19,17 @@ namespace BookShop.ViewModels
         [Required(ErrorMessage = "Author is required")]
         [Display(Name = "Author")]
         public int AuthorId { get; set; }
-        public string AuthorName { get; set; }
+        //public string AuthorName { get; set; }
         
         [Required(ErrorMessage = "Genre is required")]
         [Display(Name = "Genre")]
         public int GenreId { get; set; }
-        public string GenreName { get; set; }
+        //public string GenreName { get; set; }
         
         [Required(ErrorMessage = "Language is required")]
         [Display(Name = "Language")]
         public int LanguageId { get; set; }
-        public string LanguageName { get; set; }
+        //public string LanguageName { get; set; }
         
         [Required(ErrorMessage = "Description is required")]
         [StringLength(2000, ErrorMessage = "Description cannot be longer than 2000 characters")]
@@ -43,7 +43,7 @@ namespace BookShop.ViewModels
         public decimal Price { get; set; }
         
         [Display(Name = "In Stock")]
-        public bool InStock { get; set; } = true;
+        public int InStock { get; set; }
         
         [Required(ErrorMessage = "Publication date is required")]
         [Display(Name = "Publication Date")]
@@ -61,7 +61,7 @@ namespace BookShop.ViewModels
         
         [Display(Name = "Seller")]
         public string SellerId { get; set; }
-        public string SellerName { get; set; }
+        //public string SellerName { get; set; }
         
         // Additional display properties
         public decimal AverageRating { get; set; }
