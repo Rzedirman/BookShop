@@ -54,14 +54,19 @@
                                     Admin Panel
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">Content Management</h6></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Products" asp-action="Index">Manage Books</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Authors" asp-action="Index">Manage Authors</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Languages" asp-action="Index">Manage Languages</a></li>
-                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Products" asp-action="Index">Manage Books</a></li>
-                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Users" asp-action="Index">Manage Users</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">View Orders</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                    <li><h6 class="dropdown-header">User & Sales Management</h6></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Users" asp-action="Index">Manage Users</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Orders" asp-action="Index">Manage Orders</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Reports">Reports</a></li>
                                 </ul>
                             </li>
                         }

@@ -66,7 +66,7 @@
                                             <td>@($"{book.Author.Name} {book.Author.LastName}")</td>
                                             <td>$@book.Price</td>
                                             <td>
-                                                <a asp-area="Admin" asp-controller="Books" asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">Details</a>
+                                                <a asp-area="Admin" asp-controller="Products" asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">Details</a>
                                             </td>
                                         </tr>
                                     }
