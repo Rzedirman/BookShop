@@ -1,0 +1,267 @@
+﻿@* Areas/Seller/Views/Dashboard/Index.cshtml *@
+
+@model BookShop.ViewModels.SellerDashboardViewModel
+@{
+    ViewData["Title"] = "Seller Dashboard";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Seller Dashboard</h1>
+        <div>
+            <a asp-action="Account" class="btn btn-outline-primary">
+                <i class="bi bi-person-gear"></i> My Account
+            </a>
+            <a asp-area="Seller" asp-controller="Books" asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Book
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-book h1 mb-2"></i>
+                    <h5 class="card-title">My Books</h5>
+                    <p class="card-text display-6">@Model.TotalBooks</p>
+                    <small>Published Books</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-cart-check h1 mb-2"></i>
+                    <h5 class="card-title">Books Sold</h5>
+                    <p class="card-text display-6">@Model.TotalBooksSold</p>
+                    <small>Total Units Sold</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-receipt h1 mb-2"></i>
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text display-6">@Model.TotalOrders</p>
+                    <small>Customer Orders</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-coin h1 mb-2"></i>
+                    <h5 class="card-title">Total Earnings</h5>
+                    <p class="card-text display-6">$@Model.TotalEarnings.ToString("0.00")</p>
+                    <small>All Time Revenue</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Balance and Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success bg-opacity-10">
+                    <h5 class="mb-0 text-success">
+                        <i class="bi bi-wallet2"></i> Current Balance
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="text-success mb-3">$@Model.CurrentUserBalance.ToString("0.00")</h2>
+                    <p class="text-muted mb-0">Available in your virtual wallet</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-area="Seller" asp-controller="Books" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="bi bi-list-ul"></i> Manage My Books
+                        </a>
+                        <a asp-area="Seller" asp-controller="Books" asp-action="Create" class="btn btn-outline-success">
+                            <i class="bi bi-plus-circle"></i> Add New Book
+                        </a>
+                        <a asp-area="Seller" asp-controller="Sales" asp-action="Index" class="btn btn-outline-info">
+                            <i class="bi bi-graph-up"></i> View Sales Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders and Top Selling Books -->
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Orders</h5>
+                    <a asp-area="Seller" asp-controller="Sales" asp-action="Orders" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order</th>
+                                        <th>Customer</th>
+                                        <th>Book</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>#@order.OrderId</strong>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <small>@order.User.Email</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @order.Product.Title
+                                                </div>
+                                            </td>
+                                            <td>$@order.TotalPrice.ToString("0.00")</td>
+                                            <td>@order.OrderDate.ToString("MM/dd")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-cart-x h2"></i>
+                            <p class="mb-0">No recent orders</p>
+                            <small>Orders will appear here once customers purchase your books</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selling Books -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top Selling Books</h5>
+                    <a asp-area="Seller" asp-controller="Books" asp-action="Index" class="btn btn-sm btn-outline-primary">View All Books</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopSellingBooks != null && Model.TopSellingBooks.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Sales</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in Model.TopSellingBooks)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    <a asp-area="Seller" asp-controller="Books" asp-action="Details" asp-route-id="@book.ProductId">
+                                                        @book.Title
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td>@book.SalesCount</td>
+                                            <td>$@book.TotalAmount.ToString("0.00")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-graph-down h2"></i>
+                            <p class="mb-0">No sales data yet</p>
+                            <small>Your best-selling books will appear here</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Getting Started Guide for New Sellers -->
+    @if (Model.TotalBooks == 0)
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary bg-opacity-10">
+                        <h5 class="mb-0 text-primary">
+                            <i class="bi bi-lightbulb"></i> Getting Started as a Seller
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-upload text-primary h2"></i>
+                                    <h6>1. Upload Your First Book</h6>
+                                    <p class="small text-muted">Add your book files, cover image, and detailed description</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-tags text-success h2"></i>
+                                    <h6>2. Set Your Price</h6>
+                                    <p class="small text-muted">You have full control over your book pricing</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="bi bi-cash-coin text-warning h2"></i>
+                                    <h6>3. Start Earning</h6>
+                                    <p class="small text-muted">Receive 100% of your sales directly to your virtual wallet</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-area="Seller" asp-controller="Books" asp-action="Create" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle"></i> Upload Your First Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+}

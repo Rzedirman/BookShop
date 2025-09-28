@@ -1,0 +1,312 @@
+﻿@* Areas/Seller/Views/Books/Edit.cshtml *@
+
+@model BookShop.ViewModels.BookViewModel
+@{
+    ViewData["Title"] = "Edit Book";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Book</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                <i class="bi bi-eye"></i> View Details
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to My Books
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editBookForm">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageName" />
+        <input type="hidden" asp-for="FilePath" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="row">
+            <!-- Main Book Information -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-book"></i> Book Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Book Title</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="AuthorId" class="form-label">Author</label>
+                                <select asp-for="AuthorId" class="form-select" asp-items="ViewBag.AuthorId">
+                                    <option value="">-- Select Author --</option>
+                                </select>
+                                <span asp-validation-for="AuthorId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="GenreId" class="form-label">Genre</label>
+                                <select asp-for="GenreId" class="form-select" asp-items="ViewBag.GenreId">
+                                    <option value="">-- Select Genre --</option>
+                                </select>
+                                <span asp-validation-for="GenreId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="LanguageId" class="form-label">Language</label>
+                                <select asp-for="LanguageId" class="form-select" asp-items="ViewBag.LanguageId">
+                                    <option value="">-- Select Language --</option>
+                                </select>
+                                <span asp-validation-for="LanguageId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Price" class="form-label">Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0.01" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="InStock" class="form-label">In Stock</label>
+                                <input asp-for="InStock" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="InStock" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="PublicationDate" class="form-label">Publication Date</label>
+                                <input asp-for="PublicationDate" class="form-control" type="date" />
+                                <span asp-validation-for="PublicationDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Files and Actions -->
+            <div class="col-md-4">
+                <!-- Current Files -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-files"></i> Current Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Current Cover Image -->
+                        <div class="mb-3">
+                            <label class="form-label">Current Cover Image</label>
+                            <div class="text-center mb-2">
+                                @if (!string.IsNullOrEmpty(Model.ImageName) && Model.ImageName != "noimage.png")
+                                {
+                                    <img src="~/images/covers/@Model.ImageName" class="img-thumbnail" style="max-height: 150px;" alt="Book Cover" />
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <i class="bi bi-check-circle"></i> Custom cover uploaded
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 150px;">
+                                        <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Using default cover</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Current Book File -->
+                        <div class="mb-3">
+                            <label class="form-label">Current Book File</label>
+                            <div class="border rounded p-3 text-center">
+                                @if (!string.IsNullOrEmpty(Model.FilePath))
+                                {
+                                    <i class="bi bi-file-earmark-check text-success h3"></i>
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <strong>File uploaded:</strong><br>
+                                            <code>@Model.FilePath</code>
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-file-earmark-x text-danger h3"></i>
+                                    <div class="mt-2">
+                                        <small class="text-danger">No file uploaded</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Uploads -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Update Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="CoverImage" class="form-label">New Cover Image</label>
+                            <input asp-for="CoverImage" type="file" class="form-control" accept="image/*" />
+                            <div class="form-text">
+                                <small>Leave empty to keep current cover. Max 2MB.</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BookFile" class="form-label">New Book File</label>
+                            <input asp-for="BookFile" type="file" class="form-control" accept=".pdf,.epub,.mobi" />
+                            <div class="form-text">
+                                <small>Leave empty to keep current file. Max 50MB.</small>
+                            </div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div id="uploadProgress" style="display: none;">
+                            <div class="progress mb-2">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted">Updating files...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-grid">
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Delete This Book
+                            </a>
+                        </div>
+
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i>
+                                Changes will be visible to customers immediately.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book Statistics -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Quick Stats</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <div class="h5 mb-1 text-primary">@Model.SalesCount</div>
+                                    <small class="text-muted">Sales</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 mb-1 text-success">@Model.ReviewsCount</div>
+                                <small class="text-muted">Reviews</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <script>
+        $(document).ready(function () {
+            // Handle form submission with file upload progress
+            $('#editBookForm').on('submit', function () {
+                var bookFile = $('#BookFile')[0].files[0];
+                var coverImage = $('#CoverImage')[0].files[0];
+
+                if (bookFile || coverImage) {
+                    $('#uploadProgress').show();
+                    $('.progress-bar').css('width', '50%');
+
+                    // Simulate progress
+                    setTimeout(function () {
+                        $('.progress-bar').css('width', '100%');
+                    }, 1000);
+                }
+            });
+
+            // File size validation
+            $('#BookFile').change(function () {
+                var file = this.files[0];
+                if (file && file.size > 52428800) { // 50MB
+                    alert('Book file size must be less than 50MB');
+                    $(this).val('');
+                }
+            });
+
+            $('#CoverImage').change(function () {
+                var file = this.files[0];
+                if (file && file.size > 2097152) { // 2MB
+                    alert('Cover image size must be less than 2MB');
+                    $(this).val('');
+                }
+            });
+
+            // Preview image on change
+            $('#CoverImage').change(function () {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('.img-thumbnail').attr('src', e.target.result);
+                        $('.text-success').html('<i class="bi bi-check-circle"></i> New cover selected');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+}

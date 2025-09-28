@@ -70,6 +70,26 @@
                                 </ul>
                             </li>
                         }
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("seller"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="sellerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Seller Panel
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="sellerDropdown">
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Dashboard" asp-action="Account">My Account</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">Book Management</h6></li>
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Books" asp-action="Index">My Books</a></li>
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Books" asp-action="Create">Add New Book</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">Sales & Reports</h6></li>
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Sales" asp-action="Index">Sales Reports</a></li>
+                                    <li><a class="dropdown-item" asp-area="Seller" asp-controller="Sales" asp-action="Orders">My Orders</a></li>
+                                </ul>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>

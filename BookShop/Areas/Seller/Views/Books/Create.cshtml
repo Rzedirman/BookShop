@@ -1,0 +1,358 @@
+﻿@* Areas/Seller/Views/Books/Create.cshtml *@
+
+@model BookShop.ViewModels.CreateBookViewModel
+@{
+    ViewData["Title"] = "Add New Book";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Add New Book</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to My Books
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <h5><i class="bi bi-exclamation-triangle"></i> Please correct the following errors:</h5>
+            <div asp-validation-summary="All" class="mb-0"></div>
+        </div>
+    }
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" id="createBookForm">
+        <div class="row">
+            <!-- Main Book Information -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-book"></i> Book Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Book Title -->
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter the book title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <!-- Book Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5"
+                                      placeholder="Provide a detailed description of your book..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="form-text">A compelling description helps customers understand what your book is about.</div>
+                        </div>
+
+                        <!-- Price and Stock -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Price" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0.01" max="999.99" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                                <div class="form-text">You have full control over your book's price.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="InStock" class="form-label"></label>
+                                <input asp-for="InStock" class="form-control" type="number" min="1" />
+                                <span asp-validation-for="InStock" class="text-danger"></span>
+                                <div class="form-text">Number of copies available for sale.</div>
+                            </div>
+                        </div>
+
+                        <!-- Publication Date -->
+                        <div class="mb-3">
+                            <label asp-for="PublicationDate" class="form-label"></label>
+                            <input asp-for="PublicationDate" class="form-control" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="PublicationDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Author Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person"></i> Author Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="useExistingAuthor" checked>
+                                <label class="form-check-label" for="useExistingAuthor">
+                                    Select from existing authors
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="existingAuthorSection">
+                            <div class="mb-3">
+                                <label asp-for="AuthorId" class="form-label">Select Author</label>
+                                <select asp-for="AuthorId" class="form-select" asp-items="ViewBag.AuthorId">
+                                    <option value="">-- Select an existing author --</option>
+                                </select>
+                                <span asp-validation-for="AuthorId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div id="newAuthorSection" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                Creating a new author. We'll check for similar names to prevent duplicates.
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AuthorFirstName" class="form-label"></label>
+                                    <input asp-for="AuthorFirstName" class="form-control" />
+                                    <span asp-validation-for="AuthorFirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AuthorLastName" class="form-label"></label>
+                                    <input asp-for="AuthorLastName" class="form-control" />
+                                    <span asp-validation-for="AuthorLastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AuthorCountry" class="form-label"></label>
+                                    <input asp-for="AuthorCountry" class="form-control" />
+                                    <span asp-validation-for="AuthorCountry" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AuthorBirthDate" class="form-label"></label>
+                                    <input asp-for="AuthorBirthDate" class="form-control" type="date" />
+                                    <span asp-validation-for="AuthorBirthDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="AuthorDeathDate" class="form-label"></label>
+                                <input asp-for="AuthorDeathDate" class="form-control" type="date" />
+                                <span asp-validation-for="AuthorDeathDate" class="text-danger"></span>
+                                <div class="form-text">Leave empty if the author is still alive.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-tags"></i> Categories</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Genre Section -->
+                        <div class="mb-4">
+                            <h6>Genre</h6>
+                            <div class="mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="useExistingGenre" checked>
+                                    <label class="form-check-label" for="useExistingGenre">
+                                        Select from existing genres
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="existingGenreSection">
+                                <select asp-for="GenreId" class="form-select" asp-items="ViewBag.GenreId">
+                                    <option value="">-- Select a genre --</option>
+                                </select>
+                                <span asp-validation-for="GenreId" class="text-danger"></span>
+                            </div>
+                            <div id="newGenreSection" style="display: none;">
+                                <input asp-for="NewGenreName" class="form-control" placeholder="Enter new genre name" />
+                                <span asp-validation-for="NewGenreName" class="text-danger"></span>
+                                <div class="form-text">We'll check if this genre already exists to prevent duplicates.</div>
+                            </div>
+                        </div>
+
+                        <!-- Language Section -->
+                        <div class="mb-3">
+                            <h6>Language</h6>
+                            <div class="mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="useExistingLanguage" checked>
+                                    <label class="form-check-label" for="useExistingLanguage">
+                                        Select from existing languages
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="existingLanguageSection">
+                                <select asp-for="LanguageId" class="form-select" asp-items="ViewBag.LanguageId">
+                                    <option value="">-- Select a language --</option>
+                                </select>
+                                <span asp-validation-for="LanguageId" class="text-danger"></span>
+                            </div>
+                            <div id="newLanguageSection" style="display: none;">
+                                <input asp-for="NewLanguageName" class="form-control" placeholder="Enter new language name" />
+                                <span asp-validation-for="NewLanguageName" class="text-danger"></span>
+                                <div class="form-text">We'll check if this language already exists to prevent duplicates.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Uploads and Actions -->
+            <div class="col-md-4">
+                <!-- File Uploads -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> File Uploads</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Cover Image -->
+                        <div class="mb-3">
+                            <label asp-for="CoverImage" class="form-label"></label>
+                            <input asp-for="CoverImage" type="file" class="form-control" accept="image/*" />
+                            <span asp-validation-for="CoverImage" class="text-danger"></span>
+                            <div class="form-text">
+                                <strong>Optional:</strong> Upload a cover image (JPG, PNG, max 2MB)
+                            </div>
+                        </div>
+
+                        <!-- Book File -->
+                        <div class="mb-3">
+                            <label asp-for="BookFile" class="form-label"></label>
+                            <input asp-for="BookFile" type="file" class="form-control" accept=".pdf,.epub,.mobi" />
+                            <span asp-validation-for="BookFile" class="text-danger"></span>
+                            <div class="form-text">
+                                <strong>Required:</strong> Upload your book file (PDF, EPUB, MOBI, max 50MB)
+                            </div>
+                        </div>
+
+                        <!-- File Upload Progress -->
+                        <div id="uploadProgress" style="display: none;">
+                            <div class="progress mb-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted">Uploading files...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Create Book
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i>
+                                Your book will be available for purchase immediately after creation.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <script>
+        $(document).ready(function () {
+            // Handle author section toggle
+            $('#useExistingAuthor').change(function () {
+                if (this.checked) {
+                    $('#existingAuthorSection').show();
+                    $('#newAuthorSection').hide();
+                    // Clear new author fields and set AuthorId as required
+                    $('#AuthorId').prop('required', true);
+                    $('#AuthorFirstName').prop('required', false);
+                    $('#AuthorLastName').prop('required', false);
+                    $('#AuthorCountry').prop('required', false);
+                } else {
+                    $('#existingAuthorSection').hide();
+                    $('#newAuthorSection').show();
+                    // Clear existing selection and set new author fields as required
+                    $('#AuthorId').prop('required', false).val('');
+                    $('#AuthorFirstName').prop('required', true);
+                    $('#AuthorLastName').prop('required', true);
+                    $('#AuthorCountry').prop('required', true);
+                }
+            });
+
+            // Handle genre section toggle
+            $('#useExistingGenre').change(function () {
+                if (this.checked) {
+                    $('#existingGenreSection').show();
+                    $('#newGenreSection').hide();
+                    $('#GenreId').prop('required', true);
+                    $('#NewGenreName').prop('required', false);
+                } else {
+                    $('#existingGenreSection').hide();
+                    $('#newGenreSection').show();
+                    $('#GenreId').prop('required', false).val('');
+                    $('#NewGenreName').prop('required', true);
+                }
+            });
+
+            // Handle language section toggle
+            $('#useExistingLanguage').change(function () {
+                if (this.checked) {
+                    $('#existingLanguageSection').show();
+                    $('#newLanguageSection').hide();
+                    $('#LanguageId').prop('required', true);
+                    $('#NewLanguageName').prop('required', false);
+                } else {
+                    $('#existingLanguageSection').hide();
+                    $('#newLanguageSection').show();
+                    $('#LanguageId').prop('required', false).val('');
+                    $('#NewLanguageName').prop('required', true);
+                }
+            });
+
+            // Handle form submission with file upload progress
+            $('#createBookForm').on('submit', function () {
+                var bookFile = $('#BookFile')[0].files[0];
+                var coverImage = $('#CoverImage')[0].files[0];
+
+                if (bookFile || coverImage) {
+                    $('#uploadProgress').show();
+                    $('.progress-bar').css('width', '50%');
+
+                    // Simulate progress (in real app, you'd use actual upload progress)
+                    setTimeout(function () {
+                        $('.progress-bar').css('width', '100%');
+                    }, 1000);
+                }
+            });
+
+            // File size validation
+            $('#BookFile').change(function () {
+                var file = this.files[0];
+                if (file && file.size > 52428800) { // 50MB
+                    alert('Book file size must be less than 50MB');
+                    $(this).val('');
+                }
+            });
+
+            $('#CoverImage').change(function () {
+                var file = this.files[0];
+                if (file && file.size > 2097152) { // 2MB
+                    alert('Cover image size must be less than 2MB');
+                    $(this).val('');
+                }
+            });
+        });
+    </script>
+}

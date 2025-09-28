@@ -1,0 +1,193 @@
+﻿@* Areas/Seller/Views/Dashboard/Account.cshtml *@
+
+@model BookShop.ViewModels.SellerAccountViewModel
+@{
+    ViewData["Title"] = "My Account";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Account</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Account Information Form -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Account Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateAccount" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Name" class="form-label"></label>
+                                    <input asp-for="Name" class="form-control" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="form-label"></label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <div class="form-text">This is your login email address</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label"></label>
+                            <input asp-for="Phone" class="form-control" type="tel" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BirthDate" class="form-label"></label>
+                            <input asp-for="BirthDate" class="form-control" type="date" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Summary & Statistics -->
+        <div class="col-md-4">
+            <!-- Account Summary -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Account Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">User ID:</dt>
+                        <dd class="col-sm-7">#@Model.UserId</dd>
+
+                        <dt class="col-sm-5">Role:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-success">@Model.RoleName</span>
+                        </dd>
+
+                        <dt class="col-sm-5">Member Since:</dt>
+                        <dd class="col-sm-7">@Model.CreatedDate.ToString("MMMM yyyy")</dd>
+
+                        <dt class="col-sm-5">Account Age:</dt>
+                        <dd class="col-sm-7">
+                            @{
+                                var accountAge = DateTime.Now - Model.CreatedDate;
+                                string ageText = "";
+                                if (accountAge.Days < 30)
+                                    ageText = $"{accountAge.Days} days";
+                                else if (accountAge.Days < 365)
+                                    ageText = $"{accountAge.Days / 30} months";
+                                else
+                                    ageText = $"{accountAge.Days / 365} years";
+                            }
+                            @ageText
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Virtual Wallet -->
+            <div class="card mb-3 border-success">
+                <div class="card-header bg-success bg-opacity-10">
+                    <h5 class="mb-0 text-success">
+                        <i class="bi bi-wallet2"></i> Virtual Wallet
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="text-success mb-2">$@Model.Balance.ToString("0.00")</h2>
+                    <p class="text-muted mb-3">Current Balance</p>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        You receive 100% of your book sales directly to this wallet
+                    </small>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning">
+                        <i class="bi bi-shield-check"></i> Account Security
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="small mb-2">
+                        <strong>Password:</strong> To change your password, please contact support or use the main account settings.
+                    </p>
+                    <p class="small mb-2">
+                        <strong>Email Changes:</strong> Changing your email will affect your login credentials.
+                    </p>
+                    <p class="small mb-0">
+                        <strong>Data Protection:</strong> Your personal information is secured and encrypted.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house"></i> Dashboard
+                        </a>
+                        <a asp-area="Seller" asp-controller="Books" asp-action="Index" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-book"></i> My Books
+                        </a>
+                        <a asp-area="Seller" asp-controller="Sales" asp-action="Index" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-graph-up"></i> Sales Reports
+                        </a>
+                        <a asp-controller="Home" asp-action="Logout" asp-area="" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+}

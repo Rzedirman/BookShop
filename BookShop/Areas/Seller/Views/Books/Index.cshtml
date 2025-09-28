@@ -1,0 +1,279 @@
+﻿@* Areas/Seller/Views/Books/Index.cshtml *@
+
+@model BookShop.Helpers.PaginatedList<BookShop.Models.Product>
+@{
+    ViewData["Title"] = "My Books";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Books</h1>
+        <div>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Book
+            </a>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Search Books</label>
+                    <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control"
+                           placeholder="Search by title, author, genre..." />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+                <div class="col-md-3 text-end">
+                    <small class="text-muted">
+                        Showing @Model.Count of @((ViewData["TotalCount"] as int?) ?? Model.Count) books
+                    </small>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <!-- Books Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Cover</th>
+                                <th>
+                                    <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                        Title
+                                        @if (string.IsNullOrEmpty((string)ViewData["CurrentSort"]))
+                                        {
+                                            <i class="bi bi-arrow-up-short"></i>
+                                        }
+                                        else if ((string)ViewData["CurrentSort"] == "title_desc")
+                                        {
+                                            <i class="bi bi-arrow-down-short"></i>
+                                        }
+                                    </a>
+                                </th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th>
+                                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                        Price
+                                        @if ((string)ViewData["CurrentSort"] == "price")
+                                        {
+                                            <i class="bi bi-arrow-up-short"></i>
+                                        }
+                                        else if ((string)ViewData["CurrentSort"] == "price_desc")
+                                        {
+                                            <i class="bi bi-arrow-down-short"></i>
+                                        }
+                                    </a>
+                                </th>
+                                <th>Stock</th>
+                                <th>
+                                    <a asp-action="Index" asp-route-sortOrder="@ViewData["SalesSortParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                        Sales
+                                        @if ((string)ViewData["CurrentSort"] == "sales")
+                                        {
+                                            <i class="bi bi-arrow-up-short"></i>
+                                        }
+                                        else if ((string)ViewData["CurrentSort"] == "sales_desc")
+                                        {
+                                            <i class="bi bi-arrow-down-short"></i>
+                                        }
+                                    </a>
+                                </th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model)
+                            {
+                                var totalSales = book.Orders.Sum(o => o.Amount);
+                                var totalRevenue = book.Orders.Sum(o => o.TotalPrice);
+                                var hasFile = !string.IsNullOrEmpty(book.FileName);
+
+                                <tr>
+                                    <td>
+                                        <div style="width: 60px;">
+                                            @if (!string.IsNullOrEmpty(book.ImageName) && book.ImageName != "noimage.png")
+                                            {
+                                                <img src="~/images/covers/@book.ImageName" alt="@book.Title"
+                                                     class="img-thumbnail" style="max-height: 60px; max-width: 60px;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="bi bi-book text-muted"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@book.Title</strong><br>
+                                            <small class="text-muted">ID: @book.ProductId</small>
+                                        </div>
+                                    </td>
+                                    <td>@book.Author.Name @book.Author.LastName</td>
+                                    <td>@book.Genre.GenreName</td>
+                                    <td>
+                                        <strong>$@book.Price.ToString("0.00")</strong>
+                                    </td>
+                                    <td>
+                                        @if (book.InStock > 0)
+                                        {
+                                            <span class="badge bg-success">@book.InStock in stock</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Out of stock</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (totalSales > 0)
+                                        {
+                                            <div>
+                                                <strong>@totalSales units</strong><br>
+                                                <small class="text-success">$@totalRevenue.ToString("0.00")</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No sales</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!hasFile)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-exclamation-triangle"></i> No file
+                                            </span>
+                                        }
+                                        else if (book.InStock <= 0)
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@book.ProductId" class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@book.ProductId" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@book.ProductId" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        @{
+                            var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                            var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+                        }
+                        <li class="page-item @prevDisabled">
+                            <a asp-action="Index"
+                               asp-route-sortOrder="@ViewData["CurrentSort"]"
+                               asp-route-pageNumber="@(Model.PageIndex - 1)"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               class="page-link">
+                                Previous
+                            </a>
+                        </li>
+
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                                <a asp-action="Index"
+                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                   asp-route-pageNumber="@i"
+                                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                   class="page-link">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @nextDisabled">
+                            <a asp-action="Index"
+                               asp-route-sortOrder="@ViewData["CurrentSort"]"
+                               asp-route-pageNumber="@(Model.PageIndex + 1)"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               class="page-link">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No Books Message -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-book display-1 text-muted"></i>
+                </div>
+                <h3>No Books Yet</h3>
+                <p class="text-muted mb-4">
+                    You haven't published any books yet. Start by adding your first book to begin selling.
+                </p>
+                <a asp-action="Create" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-circle"></i> Add Your First Book
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+}

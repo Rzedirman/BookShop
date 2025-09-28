@@ -1,0 +1,446 @@
+﻿@* Areas/Seller/Views/Sales/BookDetails.cshtml *@
+
+@model BookShop.Areas.Seller.Controllers.BookAnalyticsViewModel
+@{
+    ViewData["Title"] = "Book Analytics - " + Model.Book.Title;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="bi bi-graph-up"></i> Book Analytics
+        </h1>
+        <div>
+            <a asp-controller="Books" asp-action="Details" asp-route-id="@Model.Book.ProductId" class="btn btn-outline-primary">
+                <i class="bi bi-book"></i> View Book Details
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Analytics
+            </a>
+        </div>
+    </div>
+
+    <!-- Book Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            @if (!string.IsNullOrEmpty(Model.Book.ImageName) && Model.Book.ImageName != "noimage.png")
+                            {
+                                <img src="~/images/covers/@Model.Book.ImageName" alt="@Model.Book.Title"
+                                     class="img-fluid rounded shadow" style="max-height: 120px;">
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded"
+                                     style="height: 120px; width: 100%;">
+                                    <i class="bi bi-book text-muted" style="font-size: 2rem;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-10">
+                            <h3 class="mb-1">@Model.Book.Title</h3>
+                            <p class="text-muted mb-2">by @Model.Book.Author.Name @Model.Book.Author.LastName</p>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small class="text-muted">Genre:</small><br>
+                                    <span class="badge bg-secondary">@Model.Book.Genre.GenreName</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Price:</small><br>
+                                    <strong class="text-success">$@Model.Book.Price.ToString("0.00")</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Stock:</small><br>
+                                    <span class="@(Model.Book.InStock > 0 ? "text-success" : "text-danger")">
+                                        @Model.Book.InStock units
+                                    </span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Published:</small><br>
+                                    @Model.Book.PublicationDate.ToString("MMM yyyy")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-success bg-gradient text-white text-center">
+                <div class="card-body">
+                    <i class="bi bi-cart-check h3"></i>
+                    <h4>@Model.TotalSales</h4>
+                    <small>Units Sold</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-primary bg-gradient text-white text-center">
+                <div class="card-body">
+                    <i class="bi bi-cash-coin h3"></i>
+                    <h4>$@Model.TotalRevenue.ToString("N0")</h4>
+                    <small>Total Revenue</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info bg-gradient text-white text-center">
+                <div class="card-body">
+                    <i class="bi bi-receipt h3"></i>
+                    <h4>@Model.TotalOrders</h4>
+                    <small>Orders</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning bg-gradient text-dark text-center">
+                <div class="card-body">
+                    <i class="bi bi-people h3"></i>
+                    <h4>@Model.UniqueCustomers</h4>
+                    <small>Customers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary bg-gradient text-white text-center">
+                <div class="card-body">
+                    <i class="bi bi-bar-chart h3"></i>
+                    <h4>@Model.AverageOrderSize.ToString("N1")</h4>
+                    <small>Avg Order Size</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-dark bg-gradient text-white text-center">
+                <div class="card-body">
+                    <i class="bi bi-currency-dollar h3"></i>
+                    <h4>$@Model.AverageOrderValue.ToString("N0")</h4>
+                    <small>Avg Order Value</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Monthly Performance Chart -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Monthly Performance (Last 12 Months)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.MonthlyPerformance.Any())
+                    {
+                        <canvas id="monthlyChart" height="100"></canvas>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-graph-down h1"></i>
+                            <p>No sales data for this book yet</p>
+                            <small>Performance trends will appear here once the book starts selling</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Customers -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-star"></i> Top Customers
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopCustomers != null && ((IEnumerable<dynamic>)Model.TopCustomers).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Orders</th>
+                                        <th>Spent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var customer in (IEnumerable<dynamic>)Model.TopCustomers)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div style="max-width: 120px;">
+                                                    <strong>@customer.Customer.Name @customer.Customer.LastName</strong><br>
+                                                    <small class="text-muted">@customer.Customer.Email</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@customer.OrderCount</span>
+                                            </td>
+                                            <td class="text-success">
+                                                <strong>$@customer.TotalSpent.ToString("N0")</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-people h2"></i>
+                            <p class="mb-0">No customers yet</p>
+                            <small>Customer data will appear here once sales begin</small>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Performance Insights</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TotalSales > 0)
+                    {
+                        <dl class="row mb-0 small">
+                            <dt class="col-7">Revenue per Unit:</dt>
+                            <dd class="col-5">$@(Model.TotalRevenue / Model.TotalSales).ToString("N2")</dd>
+
+                            <dt class="col-7">Repeat Customers:</dt>
+                            <dd class="col-5">
+                                @{
+                                    var repeatRate = Model.TotalOrders > 0 ? (Model.TotalOrders - Model.UniqueCustomers) * 100.0 / Model.TotalOrders : 0;
+                                }
+                                @repeatRate.ToString("N1")%
+                            </dd>
+
+                            <dt class="col-7">Conversion Efficiency:</dt>
+                            <dd class="col-5">
+                                @{
+                                    var efficiency = Model.UniqueCustomers > 0 ? Model.TotalSales * 100.0 / Model.UniqueCustomers : 0;
+                                }
+                                @efficiency.ToString("N0")%
+                            </dd>
+
+                            <dt class="col-7">Stock Turnover:</dt>
+                            <dd class="col-5">
+                                @{
+                                    var turnover = (Model.Book.InStock + Model.TotalSales) > 0 ? Model.TotalSales * 100.0 / (Model.Book.InStock + Model.TotalSales) : 0;
+                                }
+                                @turnover.ToString("N1")%
+                            </dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <i class="bi bi-info-circle h3 text-muted"></i>
+                            <p class="text-muted mb-0">Performance insights will be available after first sale</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    @if (Model.RecentOrders.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history"></i> Recent Orders
+                        </h5>
+                        <a asp-action="Orders" asp-route-searchString="@Model.Book.Title" class="btn btn-sm btn-outline-primary">
+                            View All Orders for This Book
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Date</th>
+                                        <th>Delivery Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td><strong class="text-primary">#@order.OrderId</strong></td>
+                                            <td>
+                                                <div>
+                                                    <strong>@order.User.Name @order.User.LastName</strong><br>
+                                                    <small class="text-muted">@order.User.Email</small>
+                                                </div>
+                                            </td>
+                                            <td><span class="badge bg-primary">@order.Amount</span></td>
+                                            <td><strong class="text-success">$@order.TotalPrice.ToString("N2")</strong></td>
+                                            <td>
+                                                <div>
+                                                    <strong>@order.OrderDate.ToString("MM/dd/yyyy")</strong><br>
+                                                    <small class="text-muted">@order.OrderDate.ToString("HH:mm")</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted" style="max-width: 150px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    @order.DeliveryAddress
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Book Actions</h5>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <a asp-controller="Books" asp-action="Edit" asp-route-id="@Model.Book.ProductId"
+                               class="btn btn-outline-primary mb-3 w-100">
+                                <i class="bi bi-pencil"></i><br>
+                                Edit Book
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Orders" asp-route-searchString="@Model.Book.Title"
+                               class="btn btn-outline-info mb-3 w-100">
+                                <i class="bi bi-list"></i><br>
+                                View All Orders
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Reports" asp-route-bookId="@Model.Book.ProductId"
+                               class="btn btn-outline-success mb-3 w-100">
+                                <i class="bi bi-file-earmark-bar-graph"></i><br>
+                                Generate Report
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@Model.Book.ProductId"
+                               class="btn btn-outline-secondary mb-3 w-100">
+                                <i class="bi bi-eye"></i><br>
+                                Book Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Add Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <!-- Chart.js for performance visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @if (Model.MonthlyPerformance.Any())
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var ctx = document.getElementById('monthlyChart').getContext('2d');
+                var performanceData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyPerformance));
+
+                var chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: performanceData.map(item => item.monthName + ' ' + item.year),
+                        datasets: [{
+                            label: 'Revenue ($)',
+                            data: performanceData.map(item => item.totalEarnings),
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Books Sold',
+                            data: performanceData.map(item => item.booksSold),
+                            type: 'line',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                            fill: false,
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return '$' + value.toFixed(0);
+                                    }
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                grid: {
+                                    drawOnChartArea: false,
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        if (context.datasetIndex === 0) {
+                                            return 'Revenue: $' + context.parsed.y.toFixed(2);
+                                        } else {
+                                            return 'Books Sold: ' + context.parsed.y;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    }
+}
