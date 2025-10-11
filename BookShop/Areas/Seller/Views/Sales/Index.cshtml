@@ -1,6 +1,6 @@
 ﻿@* Areas/Seller/Views/Sales/Index.cshtml *@
 
-@model BookShop.Areas.Seller.Controllers.SellerSalesOverviewViewModel
+@model BookShop.ViewModels.SellerSalesOverviewViewModel
 @{
     ViewData["Title"] = "Sales Analytics";
     var growthIcon = Model.SalesGrowthPercentage >= 0 ? "bi-arrow-up" : "bi-arrow-down";
@@ -13,9 +13,9 @@
             <i class="bi bi-graph-up"></i> Sales Analytics
         </h1>
         <div>
-            <a asp-action="Reports" class="btn btn-outline-primary">
+            @* <a asp-action="Reports" class="btn btn-outline-primary">
                 <i class="bi bi-file-earmark-bar-graph"></i> Generate Reports
-            </a>
+            </a> *@
             <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
@@ -61,163 +61,110 @@
             <div class="card bg-warning bg-gradient text-dark">
                 <div class="card-body text-center">
                     <i class="bi bi-receipt h2 mb-2"></i>
-                    <h5 class="card-title">Avg. Order</h5>
+                    <h5 class="card-title">Avg. Order Value</h5>
                     <p class="card-text display-6">$@Model.AverageOrderValue.ToString("N2")</p>
-                    <small>Per order value</small>
+                    <small>Per transaction</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Monthly Trend and Growth -->
+    <!-- Growth Metrics -->
     <div class="row mb-4">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-graph-up"></i> Sales Trend (Last 12 Months)
+                        <i class="bi bi-graph-up-arrow"></i> Monthly Growth
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (Model.MonthlySalesData.Any())
-                    {
-                        <canvas id="salesChart" height="100"></canvas>
-                    }
-                    else
-                    {
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-graph-down h1"></i>
-                            <p>No sales data available yet</p>
-                            <small>Start selling to see your performance trends</small>
+                    <div class="row">
+                        <div class="col-6">
+                            <h6 class="text-muted">This Month</h6>
+                            <h4 class="text-success">$@Model.ThisMonthSales.ToString("N2")</h4>
                         </div>
-                    }
+                        <div class="col-6">
+                            <h6 class="text-muted">Last Month</h6>
+                            <h4>$@Model.LastMonthSales.ToString("N2")</h4>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="@growthColor">
+                            <i class="bi @growthIcon"></i>
+                            @Math.Abs(Model.SalesGrowthPercentage).ToString("F1")%
+                        </span>
+                        @if (Model.SalesGrowthPercentage >= 0)
+                        {
+                            <span class="text-muted">growth from last month</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">decrease from last month</span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <!-- Monthly Performance -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0">Monthly Performance</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-12 mb-3">
-                            <h3 class="text-primary">$@Model.ThisMonthSales.ToString("N2")</h3>
-                            <small class="text-muted">This Month</small>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <h5 class="text-muted">$@Model.LastMonthSales.ToString("N2")</h5>
-                            <small class="text-muted">Last Month</small>
-                        </div>
-                    </div>
-
-                    @if (Model.LastMonthSales > 0)
-                    {
-                        <div class="text-center">
-                            <span class="@growthColor">
-                                <i class="bi @growthIcon"></i>
-                                @Math.Abs(Model.SalesGrowthPercentage).ToString("N1")%
-                            </span>
-                            <br>
-                            <small class="text-muted">vs last month</small>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Quick Stats</h5>
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar3"></i> Monthly Sales Trend
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <dl class="row mb-0 small">
-                        <dt class="col-6">Total Orders:</dt>
-                        <dd class="col-6">@Model.TotalOrders</dd>
-
-                        <dt class="col-6">Repeat Customers:</dt>
-                        <dd class="col-6">
-                            @{
-                                var repeatRate = Model.TotalOrders > 0 ? (Model.TotalOrders - Model.UniqueCustomers) * 100.0 / Model.TotalOrders : 0;
-                            }
-                            @repeatRate.ToString("N1")%
-                        </dd>
-
-                        <dt class="col-6">Books per Order:</dt>
-                        <dd class="col-6">
-                            @(Model.TotalOrders > 0 ? (Model.TotalBooksSold / (decimal)Model.TotalOrders).ToString("N1") : "0")
-                        </dd>
-
-                        <dt class="col-6">Revenue per Book:</dt>
-                        <dd class="col-6">
-                            $@(Model.TotalBooksSold > 0 ? (Model.TotalEarnings / Model.TotalBooksSold).ToString("N2") : "0.00")
-                        </dd>
-                    </dl>
+                    @if (Model.MonthlySalesData?.Any() == true)
+                    {
+                        <canvas id="monthlySalesChart" height="100"></canvas>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="bi bi-info-circle h1 text-muted"></i>
+                            <p class="text-muted">No sales data available yet.</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Top Selling Books and Recent Orders -->
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-star"></i> Top Selling Books
+                        <i class="bi bi-trophy"></i> Top Selling Books
                     </h5>
-                    <a asp-controller="Books" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                        View All Books
-                    </a>
                 </div>
                 <div class="card-body">
-                    @if (Model.TopSellingBooks.Any())
+                    @if (Model.TopSellingBooks?.Any() == true)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Book</th>
-                                        <th>Sales</th>
-                                        <th>Revenue</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var book in Model.TopSellingBooks.Take(8))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                    @book.Title
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-primary">@book.SalesCount</span>
-                                            </td>
-                                            <td class="text-success">
-                                                <strong>$@book.TotalAmount.ToString("N2")</strong>
-                                            </td>
-                                            <td>
-                                                <a asp-action="BookDetails" asp-route-id="@book.ProductId"
-                                                   class="btn btn-sm btn-outline-info">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="list-group list-group-flush">
+                            @foreach (var book in Model.TopSellingBooks)
+                            {
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@book.Title</h6>
+                                            <small class="text-muted">@book.SalesCount units sold</small>
+                                        </div>
+                                        <span class="badge bg-success rounded-pill">
+                                            $@book.TotalAmount.ToString("N0")
+                                        </span>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
                     {
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-graph-down h2"></i>
-                            <p>No sales data yet</p>
-                            <small>Your best-selling books will appear here</small>
+                        <div class="text-center py-3">
+                            <i class="bi bi-book h1 text-muted"></i>
+                            <p class="text-muted">No book sales yet.</p>
                         </div>
                     }
                 </div>
@@ -226,63 +173,44 @@
 
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-clock-history"></i> Recent Orders
                     </h5>
-                    <a asp-action="Orders" class="btn btn-sm btn-outline-primary">
-                        View All Orders
-                    </a>
                 </div>
                 <div class="card-body">
-                    @if (Model.RecentOrders.Any())
+                    @if (Model.RecentOrders?.Any() == true)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Order</th>
-                                        <th>Customer</th>
-                                        <th>Book</th>
-                                        <th>Amount</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var order in Model.RecentOrders)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <strong>#@order.OrderId</strong>
-                                            </td>
-                                            <td>
-                                                <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                    @order.User.Name @order.User.LastName
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                    @order.Product.Title
-                                                </div>
-                                            </td>
-                                            <td class="text-success">
-                                                <strong>$@order.TotalPrice.ToString("N2")</strong>
-                                            </td>
-                                            <td>
-                                                <small>@order.OrderDate.ToString("MM/dd HH:mm")</small>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="list-group list-group-flush">
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">@order.Product.Title</h6>
+                                            <small class="text-muted">
+                                                by @order.User.Name @order.User.LastName •
+                                                @order.OrderDate.ToString("MMM dd, yyyy")
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">
+                                            $@order.TotalPrice.ToString("N2")
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="mt-3">
+                            <a asp-action="Orders" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-arrow-right"></i> View All Orders
+                            </a>
                         </div>
                     }
                     else
                     {
-                        <div class="text-center text-muted py-4">
-                            <i class="bi bi-cart-x h2"></i>
-                            <p>No orders yet</p>
-                            <small>Recent customer orders will appear here</small>
+                        <div class="text-center py-3">
+                            <i class="bi bi-cart h1 text-muted"></i>
+                            <p class="text-muted">No orders yet.</p>
                         </div>
                     }
                 </div>
@@ -290,35 +218,35 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="row mt-4">
+    <!-- Quick Actions -->
+    <div class="row">
         <div class="col-12">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Analytics Actions</h5>
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <a asp-action="Orders" class="btn btn-outline-primary mb-3 w-100">
-                                <i class="bi bi-list-ul"></i><br>
-                                View All Orders
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a asp-area="Seller" asp-controller="Books" asp-action="Create" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i> Add New Book
                             </a>
                         </div>
-                        <div class="col-md-3">
-                            <a asp-action="Reports" class="btn btn-outline-success mb-3 w-100">
-                                <i class="bi bi-file-earmark-spreadsheet"></i><br>
-                                Generate Reports
+                        <div class="col-md-4">
+                            <a asp-area="Seller" asp-controller="Books" asp-action="Index" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-list-ul"></i> Manage Books
                             </a>
                         </div>
-                        <div class="col-md-3">
-                            <a asp-controller="Books" asp-action="Index" class="btn btn-outline-info mb-3 w-100">
-                                <i class="bi bi-book"></i><br>
-                                Manage Books
+                        @* <div class="col-md-3">
+                            <a asp-action="Reports" class="btn btn-outline-info w-100">
+                                <i class="bi bi-file-earmark-bar-graph"></i> Detailed Reports
                             </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a asp-controller="Books" asp-action="Create" class="btn btn-outline-warning mb-3 w-100">
-                                <i class="bi bi-plus-circle"></i><br>
-                                Add New Book
+                        </div> *@
+                        <div class="col-md-4">
+                            <a asp-action="Orders" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-receipt"></i> Order History
                             </a>
                         </div>
                     </div>
@@ -329,83 +257,45 @@
 </div>
 
 @section Scripts {
-    <!-- Add Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- Chart.js for monthly sales chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-    <!-- Chart.js for sales visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    @if (Model.MonthlySalesData.Any())
+    @if (Model.MonthlySalesData?.Any() == true)
     {
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var ctx = document.getElementById('salesChart').getContext('2d');
-                var salesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlySalesData));
-
-                var chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: salesData.map(item => item.monthName + ' ' + item.year),
-                        datasets: [{
-                            label: 'Revenue ($)',
-                            data: salesData.map(item => item.totalEarnings),
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                            tension: 0.1,
-                            fill: true
-                        }, {
-                            label: 'Books Sold',
-                            data: salesData.map(item => item.booksSold),
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                            tension: 0.1,
-                            yAxisID: 'y1'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function (value) {
-                                        return '$' + value.toFixed(2);
-                                    }
-                                }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                beginAtZero: true,
-                                grid: {
-                                    drawOnChartArea: false,
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        if (context.datasetIndex === 0) {
-                                            return 'Revenue: $' + context.parsed.y.toFixed(2);
-                                        } else {
-                                            return 'Books Sold: ' + context.parsed.y;
-                                        }
-                                    }
+            // Monthly Sales Chart
+            const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+            const monthlySalesChart = new Chart(monthlySalesCtx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.MonthlySalesData.Select(m => $"'{m.MonthName} {m.Year}'")))],
+                    datasets: [{
+                        label: 'Monthly Earnings',
+                        data: [@Html.Raw(string.Join(",", Model.MonthlySalesData.Select(m => m.TotalEarnings.ToString("F2"))))],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return '$' + value.toLocaleString();
                                 }
                             }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
                     }
-                });
+                }
             });
         </script>
     }

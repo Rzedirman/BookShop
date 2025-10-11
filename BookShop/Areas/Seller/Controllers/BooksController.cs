@@ -499,7 +499,7 @@ namespace BookShop.Areas.Seller.Controllers
         /// Fuzzy matching for author names to prevent duplicates
         /// </summary>
         private async Task<int> GetOrCreateAuthorAsync(string firstName, string lastName, string country,
-            DateTime? birthDate = null, DateTime? deathDate = null)
+    DateTime? birthDate = null, DateTime? deathDate = null)
         {
             // Check for exact match first
             var existingAuthor = await _context.Authors
@@ -513,21 +513,28 @@ namespace BookShop.Areas.Seller.Controllers
                 return existingAuthor.AuthorId;
             }
 
-            // Check for fuzzy matches (similar names)
+            // Using first letter similarity and length constraints for better performance
+            var firstNameLower = firstName.ToLower();
+            var lastNameLower = lastName.ToLower();
+
             var similarAuthors = await _context.Authors
                 .Where(a =>
-                    (a.Name.ToLower().Contains(firstName.ToLower()) || firstName.ToLower().Contains(a.Name.ToLower())) &&
-                    (a.LastName.ToLower().Contains(lastName.ToLower()) || lastName.ToLower().Contains(a.LastName.ToLower())))
+                    // Get authors whose names start with same letter and are within reasonable length difference
+                    a.Name.ToLower().StartsWith(firstNameLower.Substring(0, 1)) &&
+                    a.LastName.ToLower().StartsWith(lastNameLower.Substring(0, 1)) &&
+                    Math.Abs(a.Name.Length - firstName.Length) <= 3 &&
+                    Math.Abs(a.LastName.Length - lastName.Length) <= 3)
                 .ToListAsync();
 
-            // If we find a very similar author, return it
-            var exactMatch = similarAuthors.FirstOrDefault(a =>
-                LevenshteinDistance(a.Name.ToLower(), firstName.ToLower()) <= 2 &&
-                LevenshteinDistance(a.LastName.ToLower(), lastName.ToLower()) <= 2);
+            // Apply Levenshtein distance check to the candidates
+            var fuzzyMatch = similarAuthors.FirstOrDefault(a =>
+                LevenshteinDistance(a.Name.ToLower(), firstNameLower) <= 2 &&
+                LevenshteinDistance(a.LastName.ToLower(), lastNameLower) <= 2);
 
-            if (exactMatch != null)
+            if (fuzzyMatch != null)
             {
-                return exactMatch.AuthorId;
+                _logger.LogInformation($"Found similar author: '{fuzzyMatch.Name} {fuzzyMatch.LastName}' for input '{firstName} {lastName}'");
+                return fuzzyMatch.AuthorId;
             }
 
             // Create new author
@@ -542,6 +549,7 @@ namespace BookShop.Areas.Seller.Controllers
 
             _context.Authors.Add(newAuthor);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Created new author: {firstName} {lastName}");
             return newAuthor.AuthorId;
         }
 
@@ -559,23 +567,31 @@ namespace BookShop.Areas.Seller.Controllers
                 return existingGenre.GenreId;
             }
 
-            // Check for fuzzy matches
+            
+            var genreNameLower = genreName.ToLower();
+
             var similarGenres = await _context.Genres
-                .Where(g => g.GenreName.ToLower().Contains(genreName.ToLower()) || genreName.ToLower().Contains(g.GenreName.ToLower()))
+                .Where(g =>
+                    // Get genres that start with same letter and are within reasonable length difference
+                    g.GenreName.ToLower().StartsWith(genreNameLower.Substring(0, 1)) &&
+                    Math.Abs(g.GenreName.Length - genreName.Length) <= 3)
                 .ToListAsync();
 
-            var exactMatch = similarGenres.FirstOrDefault(g =>
-                LevenshteinDistance(g.GenreName.ToLower(), genreName.ToLower()) <= 2);
+            // Apply Levenshtein distance check
+            var fuzzyMatch = similarGenres.FirstOrDefault(g =>
+                LevenshteinDistance(g.GenreName.ToLower(), genreNameLower) <= 2);
 
-            if (exactMatch != null)
+            if (fuzzyMatch != null)
             {
-                return exactMatch.GenreId;
+                _logger.LogInformation($"Found similar genre: '{fuzzyMatch.GenreName}' for input '{genreName}'");
+                return fuzzyMatch.GenreId;
             }
 
             // Create new genre
             var newGenre = new Genre { GenreName = genreName };
             _context.Genres.Add(newGenre);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Created new genre: {genreName}");
             return newGenre.GenreId;
         }
 
@@ -593,23 +609,31 @@ namespace BookShop.Areas.Seller.Controllers
                 return existingLanguage.LanguageId;
             }
 
-            // Check for fuzzy matches
+            
+            var languageNameLower = languageName.ToLower();
+
             var similarLanguages = await _context.Languages
-                .Where(l => l.LanguageName.ToLower().Contains(languageName.ToLower()) || languageName.ToLower().Contains(l.LanguageName.ToLower()))
+                .Where(l =>
+                    // Get languages that start with same letter and are within reasonable length difference
+                    l.LanguageName.ToLower().StartsWith(languageNameLower.Substring(0, 1)) &&
+                    Math.Abs(l.LanguageName.Length - languageName.Length) <= 3)
                 .ToListAsync();
 
-            var exactMatch = similarLanguages.FirstOrDefault(l =>
-                LevenshteinDistance(l.LanguageName.ToLower(), languageName.ToLower()) <= 2);
+            // Apply Levenshtein distance check
+            var fuzzyMatch = similarLanguages.FirstOrDefault(l =>
+                LevenshteinDistance(l.LanguageName.ToLower(), languageNameLower) <= 2);
 
-            if (exactMatch != null)
+            if (fuzzyMatch != null)
             {
-                return exactMatch.LanguageId;
+                _logger.LogInformation($"Found similar language: '{fuzzyMatch.LanguageName}' for input '{languageName}'");
+                return fuzzyMatch.LanguageId;
             }
 
             // Create new language
             var newLanguage = new Language { LanguageName = languageName };
             _context.Languages.Add(newLanguage);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Created new language: {languageName}");
             return newLanguage.LanguageId;
         }
 

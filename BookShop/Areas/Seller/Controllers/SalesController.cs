@@ -1,9 +1,9 @@
 ﻿// Areas/Seller/Controllers/SalesController.cs
-// Sales analytics and reporting controller for sellers
+// Sales analytics and reporting controller for sellers - UPDATED VERSION
 
 using BookShop.Helpers;
 using BookShop.Models;
-using BookShop.ViewModels;
+using BookShop.ViewModels; // Make sure to use ViewModels namespace
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,29 +60,7 @@ namespace BookShop.Areas.Seller.Controllers
                 .OrderBy(s => s.Year).ThenBy(s => s.Month)
                 .ToList();
 
-            // Get top performing books
-            var topBooks = await _context.Products
-                .Include(p => p.Orders)
-                .Include(p => p.Author)
-                .Where(p => p.SellerId == currentUser.UserId && p.Orders.Any())
-                .Select(p => new TopSellingBookViewModel
-                {
-                    ProductId = p.ProductId,
-                    Title = p.Title,
-                    SalesCount = p.Orders.Sum(o => o.Amount),
-                    TotalAmount = p.Orders.Sum(o => o.TotalPrice)
-                })
-                .OrderByDescending(b => b.SalesCount)
-                .Take(10)
-                .ToListAsync();
-
-            // Calculate performance metrics
-            var totalEarnings = sellerOrders.Sum(o => o.TotalPrice);
-            var totalBooksSold = sellerOrders.Sum(o => o.Amount);
-            var uniqueCustomers = sellerOrders.Select(o => o.UserId).Distinct().Count();
-            var averageOrderValue = sellerOrders.Any() ? totalEarnings / sellerOrders.Count : 0;
-
-            // Get recent period comparison (this month vs last month)
+            // Calculate growth percentage
             var thisMonth = DateTime.Now;
             var lastMonth = thisMonth.AddMonths(-1);
 
@@ -94,30 +72,27 @@ namespace BookShop.Areas.Seller.Controllers
                 .Where(o => o.OrderDate.Year == lastMonth.Year && o.OrderDate.Month == lastMonth.Month)
                 .Sum(o => o.TotalPrice);
 
-            var salesGrowth = lastMonthSales > 0 ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : 0;
+            var growthPercentage = lastMonthSales > 0 ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : 0;
 
             var viewModel = new SellerSalesOverviewViewModel
             {
-                TotalEarnings = totalEarnings,
-                TotalBooksSold = totalBooksSold,
+                TotalEarnings = sellerOrders.Sum(o => o.TotalPrice),
+                TotalBooksSold = sellerOrders.Sum(o => o.Amount),
                 TotalOrders = sellerOrders.Count,
-                UniqueCustomers = uniqueCustomers,
-                AverageOrderValue = averageOrderValue,
+                UniqueCustomers = sellerOrders.Select(o => o.UserId).Distinct().Count(),
+                AverageOrderValue = sellerOrders.Any() ? sellerOrders.Average(o => o.TotalPrice) : 0,
                 ThisMonthSales = thisMonthSales,
                 LastMonthSales = lastMonthSales,
-                SalesGrowthPercentage = salesGrowth,
+                SalesGrowthPercentage = growthPercentage,
                 MonthlySalesData = monthlySales,
-                TopSellingBooks = topBooks,
-                RecentOrders = sellerOrders
-                    .OrderByDescending(o => o.OrderDate)
-                    .Take(10)
-                    .ToList()
+                TopSellingBooks = await GetTopSellingBooks(currentUser.UserId),
+                RecentOrders = sellerOrders.OrderByDescending(o => o.OrderDate).Take(5).ToList()
             };
 
             return View(viewModel);
         }
 
-        // GET: Seller/Sales/Orders - Detailed order management
+        // GET: Seller/Sales/Orders - List all orders for seller's books
         public async Task<IActionResult> Orders(string sortOrder, string currentFilter, string searchString,
             DateTime? startDate, DateTime? endDate, int? pageNumber)
         {
@@ -209,91 +184,90 @@ namespace BookShop.Areas.Seller.Controllers
             return View(await PaginatedList<Order>.CreateAsync(orders.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
-        // GET: Seller/Sales/BookDetails/5 - Detailed analytics for a specific book
-        public async Task<IActionResult> BookDetails(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        // GET: Seller/Sales/BookAnalytics/5 - Detailed analytics for a specific book
+        //public async Task<IActionResult> BookAnalytics(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var currentUser = await GetCurrentUserAsync();
-            if (currentUser == null)
-            {
-                return RedirectToAction("Login", "Home", new { area = "" });
-            }
+        //    var currentUser = await GetCurrentUserAsync();
+        //    if (currentUser == null)
+        //    {
+        //        return RedirectToAction("Login", "Home", new { area = "" });
+        //    }
 
-            var book = await _context.Products
-                .Include(p => p.Author)
-                .Include(p => p.Genre)
-                .Include(p => p.Language)
-                .Include(p => p.Orders)
-                .ThenInclude(o => o.User)
-                .FirstOrDefaultAsync(p => p.ProductId == id && p.SellerId == currentUser.UserId);
+        //    var book = await _context.Products
+        //        .Include(p => p.Author)
+        //        .Include(p => p.Genre)
+        //        .Include(p => p.Language)
+        //        .Include(p => p.Orders)
+        //        .ThenInclude(o => o.User)
+        //        .FirstOrDefaultAsync(p => p.ProductId == id && p.SellerId == currentUser.UserId);
 
-            if (book == null)
-            {
-                return NotFound();
-            }
+        //    if (book == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            // Calculate detailed analytics
-            var orders = book.Orders.ToList();
-            var totalSales = orders.Sum(o => o.Amount);
-            var totalRevenue = orders.Sum(o => o.TotalPrice);
-            var uniqueCustomers = orders.Select(o => o.UserId).Distinct().Count();
-            var averageOrderSize = orders.Any() ? (decimal)totalSales / orders.Count : 0;
-            var averageOrderValue = orders.Any() ? totalRevenue / orders.Count : 0;
+        //    var orders = book.Orders.ToList();
+        //    var totalSales = orders.Sum(o => o.Amount);
+        //    var totalRevenue = orders.Sum(o => o.TotalPrice);
+        //    var uniqueCustomers = orders.Select(o => o.UserId).Distinct().Count();
+        //    var averageOrderSize = orders.Any() ? (decimal)totalSales / orders.Count : 0;
+        //    var averageOrderValue = orders.Any() ? totalRevenue / orders.Count : 0;
 
-            // Monthly performance for the last 12 months
-            var monthlyPerformance = orders
-                .Where(o => o.OrderDate >= DateTime.Now.AddMonths(-12))
-                .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
-                .Select(g => new SellerMonthlySalesViewModel
-                {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    BooksSold = g.Sum(o => o.Amount),
-                    TotalEarnings = g.Sum(o => o.TotalPrice),
-                    UniqueCustomers = g.Select(o => o.UserId).Distinct().Count()
-                })
-                .OrderBy(s => s.Year).ThenBy(s => s.Month)
-                .ToList();
+        //    // Monthly performance for the last 12 months
+        //    var monthlyPerformance = orders
+        //        .Where(o => o.OrderDate >= DateTime.Now.AddMonths(-12))
+        //        .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+        //        .Select(g => new SellerMonthlySalesViewModel
+        //        {
+        //            Year = g.Key.Year,
+        //            Month = g.Key.Month,
+        //            BooksSold = g.Sum(o => o.Amount),
+        //            TotalEarnings = g.Sum(o => o.TotalPrice),
+        //            UniqueCustomers = g.Select(o => o.UserId).Distinct().Count()
+        //        })
+        //        .OrderBy(s => s.Year).ThenBy(s => s.Month)
+        //        .ToList();
 
-            // Customer analysis
-            var topCustomers = orders
-                .GroupBy(o => o.User)
-                .Select(g => new
-                {
-                    Customer = g.Key,
-                    OrderCount = g.Count(),
-                    TotalSpent = g.Sum(o => o.TotalPrice),
-                    BooksPurchased = g.Sum(o => o.Amount),
-                    FirstPurchase = g.Min(o => o.OrderDate),
-                    LastPurchase = g.Max(o => o.OrderDate)
-                })
-                .OrderByDescending(c => c.TotalSpent)
-                .Take(10)
-                .ToList();
+        //    // Customer analysis
+        //    var topCustomers = orders
+        //        .GroupBy(o => o.User)
+        //        .Select(g => new
+        //        {
+        //            Customer = g.Key,
+        //            OrderCount = g.Count(),
+        //            TotalSpent = g.Sum(o => o.TotalPrice),
+        //            BooksPurchased = g.Sum(o => o.Amount),
+        //            FirstPurchase = g.Min(o => o.OrderDate),
+        //            LastPurchase = g.Max(o => o.OrderDate)
+        //        })
+        //        .OrderByDescending(c => c.TotalSpent)
+        //        .Take(10)
+        //        .ToList();
 
-            var viewModel = new BookAnalyticsViewModel
-            {
-                Book = book,
-                TotalSales = totalSales,
-                TotalRevenue = totalRevenue,
-                TotalOrders = orders.Count,
-                UniqueCustomers = uniqueCustomers,
-                AverageOrderSize = averageOrderSize,
-                AverageOrderValue = averageOrderValue,
-                MonthlyPerformance = monthlyPerformance,
-                RecentOrders = orders
-                    .OrderByDescending(o => o.OrderDate)
-                    .Take(15)
-                    .ToList(),
-                TopCustomers = topCustomers
-            };
+        //    var viewModel = new BookAnalyticsViewModel
+        //    {
+        //        Book = book,
+        //        TotalSales = totalSales,
+        //        TotalRevenue = totalRevenue,
+        //        TotalOrders = orders.Count,
+        //        UniqueCustomers = uniqueCustomers,
+        //        AverageOrderSize = averageOrderSize,
+        //        AverageOrderValue = averageOrderValue,
+        //        MonthlyPerformance = monthlyPerformance,
+        //        RecentOrders = orders
+        //            .OrderByDescending(o => o.OrderDate)
+        //            .Take(15)
+        //            .ToList(),
+        //        TopCustomers = topCustomers
+        //    };
 
-            return View(viewModel);
-        }
+        //    return View(viewModel);
+        //}
 
         // GET: Seller/Sales/Reports - Generate and export reports
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate, string reportType = "summary")
@@ -387,86 +361,24 @@ namespace BookShop.Areas.Seller.Controllers
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == currentUserEmail);
         }
 
+        private async Task<List<TopSellingBookViewModel>> GetTopSellingBooks(int sellerId)
+        {
+            return await _context.Products
+                .Where(p => p.SellerId == sellerId)
+                .Include(p => p.Orders)
+                .Where(p => p.Orders.Any())
+                .Select(p => new TopSellingBookViewModel
+                {
+                    ProductId = p.ProductId,
+                    Title = p.Title,
+                    SalesCount = p.Orders.Sum(o => o.Amount),
+                    TotalAmount = p.Orders.Sum(o => o.TotalPrice)
+                })
+                .OrderByDescending(b => b.SalesCount)
+                .Take(5)
+                .ToListAsync();
+        }
+
         #endregion
     }
-
-    #region Additional View Models for Sales
-
-    /// <summary>
-    /// Comprehensive sales overview for seller dashboard
-    /// </summary>
-    public class SellerSalesOverviewViewModel
-    {
-        public decimal TotalEarnings { get; set; }
-        public int TotalBooksSold { get; set; }
-        public int TotalOrders { get; set; }
-        public int UniqueCustomers { get; set; }
-        public decimal AverageOrderValue { get; set; }
-        public decimal ThisMonthSales { get; set; }
-        public decimal LastMonthSales { get; set; }
-        public decimal SalesGrowthPercentage { get; set; }
-        public List<SellerMonthlySalesViewModel> MonthlySalesData { get; set; } = new List<SellerMonthlySalesViewModel>();
-        public List<TopSellingBookViewModel> TopSellingBooks { get; set; } = new List<TopSellingBookViewModel>();
-        public List<Order> RecentOrders { get; set; } = new List<Order>();
-    }
-
-    /// <summary>
-    /// Detailed analytics for individual book performance
-    /// </summary>
-    public class BookAnalyticsViewModel
-    {
-        public Product Book { get; set; }
-        public int TotalSales { get; set; }
-        public decimal TotalRevenue { get; set; }
-        public int TotalOrders { get; set; }
-        public int UniqueCustomers { get; set; }
-        public decimal AverageOrderSize { get; set; }
-        public decimal AverageOrderValue { get; set; }
-        public List<SellerMonthlySalesViewModel> MonthlyPerformance { get; set; } = new List<SellerMonthlySalesViewModel>();
-        public List<Order> RecentOrders { get; set; } = new List<Order>();
-        public dynamic TopCustomers { get; set; }
-    }
-
-    /// <summary>
-    /// Comprehensive sales report with multiple data breakdowns
-    /// </summary>
-    public class SalesReportViewModel
-    {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string ReportType { get; set; }
-        public int TotalOrders { get; set; }
-        public decimal TotalRevenue { get; set; }
-        public int TotalBooksSold { get; set; }
-        public int UniqueCustomers { get; set; }
-        public List<DailySalesData> DailySales { get; set; } = new List<DailySalesData>();
-        public List<BookPerformanceData> TopBooks { get; set; } = new List<BookPerformanceData>();
-        public List<GenrePerformanceData> GenrePerformance { get; set; } = new List<GenrePerformanceData>();
-    }
-
-    public class DailySalesData
-    {
-        public DateTime Date { get; set; }
-        public int OrderCount { get; set; }
-        public decimal Revenue { get; set; }
-        public int BooksSold { get; set; }
-    }
-
-    public class BookPerformanceData
-    {
-        public Product Book { get; set; }
-        public int OrderCount { get; set; }
-        public int BooksSold { get; set; }
-        public decimal Revenue { get; set; }
-    }
-
-    public class GenrePerformanceData
-    {
-        public string GenreName { get; set; }
-        public int OrderCount { get; set; }
-        public int BooksSold { get; set; }
-        public decimal Revenue { get; set; }
-    }
-
-    #endregion
 }

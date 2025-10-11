@@ -1,0 +1,411 @@
+﻿@* Areas/Seller/Views/Sales/Reports.cshtml *@
+
+@model BookShop.ViewModels.SalesReportViewModel
+@{
+    ViewData["Title"] = "Sales Reports";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="bi bi-file-earmark-bar-graph"></i> Sales Reports
+        </h1>
+        <div>
+            @* <button type="button" class="btn btn-success" onclick="exportToCSV()">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+            <button type="button" class="btn btn-info" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print Report
+            </button> *@
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Analytics
+            </a>
+        </div>
+    </div>
+
+    <!-- Report Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel"></i> Report Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Reports" method="get" class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="startDate" value="@ViewData["StartDate"]" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="endDate" value="@ViewData["EndDate"]" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Report Type</label>
+                    <select name="reportType" class="form-select">
+                        <option value="summary" selected="@(ViewData["ReportType"]?.ToString() == "summary")">Summary</option>
+                        <option value="detailed" selected="@(ViewData["ReportType"]?.ToString() == "detailed")">Detailed</option>
+                        <option value="books" selected="@(ViewData["ReportType"]?.ToString() == "books")">By Books</option>
+                        <option value="genres" selected="@(ViewData["ReportType"]?.ToString() == "genres")">By Genres</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-receipt h3 mb-2"></i>
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text display-6">@Model.TotalOrders</p>
+                    <small>@Model.StartDate.ToString("MMM dd") - @Model.EndDate.ToString("MMM dd, yyyy")</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-dollar h3 mb-2"></i>
+                    <h5 class="card-title">Total Revenue</h5>
+                    <p class="card-text display-6">$@Model.TotalRevenue.ToString("N0")</p>
+                    <small>Period earnings</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-book h3 mb-2"></i>
+                    <h5 class="card-title">Books Sold</h5>
+                    <p class="card-text display-6">@Model.TotalBooksSold</p>
+                    <small>Units sold</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning bg-gradient text-dark">
+                <div class="card-body text-center">
+                    <i class="bi bi-people h3 mb-2"></i>
+                    <h5 class="card-title">Customers</h5>
+                    <p class="card-text display-6">@Model.UniqueCustomers</p>
+                    <small>Unique buyers</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Sales Chart -->
+    @if (Model.DailySales?.Any() == true)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-up"></i> Daily Sales Trend
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dailySalesChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Top Performing Books -->
+    @if (Model.TopBooks?.Any() == true)
+    {
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy"></i> Top Performing Books
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Orders</th>
+                                        <th>Units</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var book in Model.TopBooks.Take(10))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>@book.Book.Title</strong><br>
+                                                    <small class="text-muted">by @book.Book.Author.Name @book.Book.Author.LastName</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@book.OrderCount</span>
+                                            </td>
+                                            <td>@book.BooksSold</td>
+                                            <td class="text-success">
+                                                <strong>$@book.Revenue.ToString("N2")</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Genre Performance -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart"></i> Sales by Genre
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.GenrePerformance?.Any() == true)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Genre</th>
+                                            <th>Orders</th>
+                                            <th>Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var genre in Model.GenrePerformance.Take(8))
+                                        {
+                                            <tr>
+                                                <td>@genre.GenreName</td>
+                                                <td>
+                                                    <span class="badge bg-info">@genre.OrderCount</span>
+                                                </td>
+                                                <td class="text-success">
+                                                    <strong>$@genre.Revenue.ToString("N2")</strong>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-info-circle h1 text-muted"></i>
+                                <p class="text-muted">No genre data available for the selected period.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Detailed Daily Sales Table -->
+    @if (ViewData["ReportType"]?.ToString() == "detailed" && Model.DailySales?.Any() == true)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar3"></i> Detailed Daily Breakdown
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="dailySalesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Orders</th>
+                                        <th>Books Sold</th>
+                                        <th>Revenue</th>
+                                        <th>Avg Order Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var day in Model.DailySales.OrderByDescending(d => d.Date))
+                                    {
+                                        <tr>
+                                            <td>@day.Date.ToString("MMM dd, yyyy")</td>
+                                            <td>@day.OrderCount</td>
+                                            <td>@day.BooksSold</td>
+                                            <td class="text-success">$@day.Revenue.ToString("N2")</td>
+                                            <td>@(day.OrderCount > 0 ? (day.Revenue / day.OrderCount).ToString("C2") : "$0.00")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // Daily Sales Chart
+        @if (Model.DailySales?.Any() == true)
+        {
+            <text>
+            const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+            const dailySalesChart = new Chart(dailySalesCtx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.DailySales.Select(d => $"'{d.Date:MMM dd}'")))],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [@Html.Raw(string.Join(",", Model.DailySales.Select(d => d.Revenue.ToString("F2"))))],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Orders',
+                        data: [@Html.Raw(string.Join(",", Model.DailySales.Select(d => d.OrderCount)))],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Revenue ($)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Orders'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Sales Performance'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Export to CSV function
+        @*
+        function exportToCSV() {
+            let csv = 'Date,Orders,Books Sold,Revenue\n';
+            
+            @if (Model.DailySales?.Any() == true)
+            {
+                @foreach (var day in Model.DailySales.OrderBy(d => d.Date))
+                {
+                    <text>csv += '@day.Date.ToString("yyyy-MM-dd"),@day.OrderCount,@day.BooksSold,@day.Revenue.ToString("F2")\n';</text>
+                }
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'sales-report-@Model.StartDate.ToString("yyyy-MM-dd")-to-@Model.EndDate.ToString("yyyy-MM-dd").csv';
+            link.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+
+        // Print styles
+        const printStyles = `
+            <style>
+                @media print {
+                    .btn, .card-header .bi, nav, footer { display: none !important; }
+                    .card { border: 1px solid #000 !important; box-shadow: none !important; }
+                    .bg-primary, .bg-success, .bg-info, .bg-warning { 
+                        background-color: #f8f9fa !important; 
+                        color: #000 !important; 
+                    }
+                }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', printStyles);
+        *@
+    </script>
+}
+
+@* <style>
+    /* Custom styles for better report presentation */
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    @media print {
+    .btn { display: none !important; }
+    }
+</style> *@
