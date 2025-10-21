@@ -39,6 +39,10 @@ builder.Services.AddScoped<IFileStorageService, FileStorageService>(); // Added 
 //builder.Services.AddScoped<IUserInitializeService, AdminInitializeService>();
 //builder.Services.AddScoped<myShopContext>();
 //builder.WebHost.UseDefaultServiceProvider(options => options.ValidateScopes = false);//My try to solve the error
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();
