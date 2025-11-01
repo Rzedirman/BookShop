@@ -1,15 +1,20 @@
-﻿using BookShop.Models;
+﻿using BookShop.Helpers;
+using BookShop.Models;
+using BookShop.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace BookShop.Controllers
 {
@@ -26,9 +31,142 @@ namespace BookShop.Controllers
             //_httpContextAccessor = httpContextAccessor;
         }
 
-        public IActionResult Index()
+        // GET: Home/Index - Main catalog page with bestsellers
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(
+            string searchString,
+            int? genreId,
+            int? authorId,
+            int? languageId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            string sortOrder,
+            int? pageNumber)
         {
-            return View();
+            try
+            {
+                _logger.LogInformation("Loading book catalog");
+
+                // Get bestsellers (top 5 books by order count)
+                var bestsellers = await _context.Products
+                    .Include(p => p.Author)
+                    .Include(p => p.Genre)
+                    .Include(p => p.Language)
+                    .Include(p => p.Orders)
+                    .Where(p => p.InStock > 0) // Only show in-stock books
+                    .OrderByDescending(p => p.Orders.Count)
+                    .Take(5)
+                    .ToListAsync();
+
+                // Start with all products query
+                var productsQuery = _context.Products
+                    .Include(p => p.Author)
+                    .Include(p => p.Genre)
+                    .Include(p => p.Language)
+                    .Where(p => p.InStock > 0) // Only show in-stock books
+                    .AsQueryable();
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    productsQuery = productsQuery.Where(p =>
+                        p.Title.Contains(searchString) ||
+                        p.Description.Contains(searchString) ||
+                        p.Author.Name.Contains(searchString) ||
+                        p.Author.LastName.Contains(searchString));
+                }
+
+                // Apply genre filter
+                if (genreId.HasValue && genreId.Value > 0)
+                {
+                    productsQuery = productsQuery.Where(p => p.GenreId == genreId.Value);
+                }
+
+                // Apply author filter
+                if (authorId.HasValue && authorId.Value > 0)
+                {
+                    productsQuery = productsQuery.Where(p => p.AuthorId == authorId.Value);
+                }
+
+                // Apply language filter
+                if (languageId.HasValue && languageId.Value > 0)
+                {
+                    productsQuery = productsQuery.Where(p => p.LanguageId == languageId.Value);
+                }
+
+                // Apply price range filter
+                if (minPrice.HasValue)
+                {
+                    productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
+                }
+
+                if (maxPrice.HasValue)
+                {
+                    productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // Apply sorting
+                ViewData["CurrentSort"] = sortOrder;
+                ViewData["TitleSortParam"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
+                ViewData["PriceSortParam"] = sortOrder == "price" ? "price_desc" : "price";
+                ViewData["DateSortParam"] = sortOrder == "date" ? "date_desc" : "date";
+                ViewData["AuthorSortParam"] = sortOrder == "author" ? "author_desc" : "author";
+
+                productsQuery = sortOrder switch
+                {
+                    "title_desc" => productsQuery.OrderByDescending(p => p.Title),
+                    "price" => productsQuery.OrderBy(p => p.Price),
+                    "price_desc" => productsQuery.OrderByDescending(p => p.Price),
+                    "date" => productsQuery.OrderBy(p => p.PublicationDate),
+                    "date_desc" => productsQuery.OrderByDescending(p => p.PublicationDate),
+                    "author" => productsQuery.OrderBy(p => p.Author.LastName).ThenBy(p => p.Author.Name),
+                    "author_desc" => productsQuery.OrderByDescending(p => p.Author.LastName).ThenByDescending(p => p.Author.Name),
+                    _ => productsQuery.OrderBy(p => p.Title)
+                };
+
+                // Pagination
+                int pageSize = 12;
+                var paginatedBooks = await PaginatedList<Product>.CreateAsync(productsQuery, pageNumber ?? 1, pageSize);
+
+                // Get filter options for dropdowns
+                var genres = await _context.Genres.OrderBy(g => g.GenreName).ToListAsync();
+                var authors = await _context.Authors.OrderBy(a => a.LastName).ThenBy(a => a.Name).ToListAsync();
+                var languages = await _context.Languages.OrderBy(l => l.LanguageName).ToListAsync();
+
+                // Create view model
+                var viewModel = new BookCatalogViewModel
+                {
+                    Bestsellers = bestsellers,
+                    AllBooks = paginatedBooks,
+                    SearchTerm = searchString,
+                    AvailableGenres = genres,
+                    AvailableAuthors = authors,
+                    AvailableLanguages = languages,
+                    CurrentFilters = new FilterParameters
+                    {
+                        GenreId = genreId,
+                        AuthorId = authorId,
+                        LanguageId = languageId,
+                        MinPrice = minPrice,
+                        MaxPrice = maxPrice
+                    }
+                };
+
+                // Store filter values in ViewData for view
+                ViewData["CurrentFilter"] = searchString;
+                ViewData["GenreId"] = genreId;
+                ViewData["AuthorId"] = authorId;
+                ViewData["LanguageId"] = languageId;
+                ViewData["MinPrice"] = minPrice;
+                ViewData["MaxPrice"] = maxPrice;
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading book catalog");
+                return View(new BookCatalogViewModel());
+            }
         }
 
         public IActionResult Login()

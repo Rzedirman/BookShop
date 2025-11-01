@@ -12,9 +12,9 @@ namespace BookShop.ViewModels
         public string SearchTerm { get; set; }
         
         // Category filters
-        public List<int> GenreIds { get; set; }
-        public List<int> AuthorIds { get; set; }
-        public List<int> LanguageIds { get; set; }
+        public int? GenreId { get; set; }
+        public int? AuthorId { get; set; }
+        public int? LanguageId { get; set; }
         
         // Price range
         public decimal? MinPrice { get; set; }
